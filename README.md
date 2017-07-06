@@ -1,9 +1,10 @@
 # monitoring
 
 #TODO
--Ajout du bouton de surveillance par nombre de fichiers
+<s>-Ajout du bouton de surveillance par nombre de fichier</s>
 
--Ajout du bouton de surveillance en fonction du temps
+
+<s>-Ajout du bouton de surveillance en fonction du temps</s>
 
 -Ajout du lineedit du temps que l'on veut attendre
 
@@ -13,7 +14,7 @@
 
 -Ajout de la fonction quitter
 
--Ajouter une radiobox afin de choisir l'option temps ou option nombre de fichier dans la premiere fenetre
+<s>-Ajouter une radiobox afin de choisir l'option temps ou option nombre de fichier dans la premiere fenetre</s>
 
 -Voir si on peut afficher les ctf
 
