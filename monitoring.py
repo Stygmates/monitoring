@@ -25,6 +25,8 @@ class monitoring():
 		#Deuxieme colonne
 		self.nbNecessaryFilesSpinBox()
 		self.okButton()
+		self.returnButton()
+		self.returnButton.clicked.connect(self.returnFunction)
 
 		self.mainLayout.addLayout(self.layout)
 		self.verticalLayout.addWidget(self.groupBox)
@@ -63,3 +65,11 @@ class monitoring():
 	def okButton(self):
 		self.okButton = QtWidgets.QPushButton("Ok")
 		self.layout3.addWidget(self.okButton)
+
+	def returnButton(self):
+		self.returnButton = QtWidgets.QPushButton("Return")
+		self.layout3.addWidget(self.returnButton)
+
+	def returnFunction(self):
+		self.window.close()
+		self.parent.window.show()
