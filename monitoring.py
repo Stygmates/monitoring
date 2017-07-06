@@ -14,6 +14,8 @@ class monitoring():
 		self.mainLayout = QtWidgets.QHBoxLayout()
 		self.layout = QtWidgets.QVBoxLayout()
 		self.layout2 = QtWidgets.QVBoxLayout()
+		self.layout3 = QtWidgets.QVBoxLayout()
+		self.verticalLayout = QtWidgets.QVBoxLayout()
 		
 		#initialisation de tous les widgets
 		#Premiere colonne
@@ -21,10 +23,13 @@ class monitoring():
 		self.startWatcher()
 
 		#Deuxieme colonne
-		self.nbNecessaryFilesLineEdit()
+		self.nbNecessaryFilesSpinBox()
 		self.okButton()
+
 		self.mainLayout.addLayout(self.layout)
-		self.mainLayout.addLayout(self.layout2)
+		self.verticalLayout.addWidget(self.groupBox)
+		self.verticalLayout.addLayout(self.layout3)
+		self.mainLayout.addLayout(self.verticalLayout)
 		self.window.setLayout(self.mainLayout)
 		self.window.show()
 
@@ -48,13 +53,13 @@ class monitoring():
 	def startWatcher(self):
 		self.watcher = watcher.watcher(self)
 
-	def nbNecessaryFilesLineEdit(self):
-		self.nbNecessaryFilesLabel = QtWidgets.QLabel("Limit before processing: ")
-		self.nbNecessaryFilesLineEdit = QtWidgets.QLineEdit()
-
-		self.layout2.addWidget(self.nbNecessaryFilesLabel)
-		self.layout2.addWidget(self.nbNecessaryFilesLineEdit)
+	def nbNecessaryFilesSpinBox(self):
+		self.groupBox = QtWidgets.QGroupBox("Limit before processing: ")
+		self.nbNecessaryFilesSpinBox = QtWidgets.QSpinBox()
+		self.nbNecessaryFilesSpinBox.setMaximum(1000)
+		self.layout2.addWidget(self.nbNecessaryFilesSpinBox)
+		self.groupBox.setLayout(self.layout2)
 
 	def okButton(self):
 		self.okButton = QtWidgets.QPushButton("Ok")
-		self.layout2.addWidget(self.okButton)
+		self.layout3.addWidget(self.okButton)
