@@ -12,7 +12,7 @@ class filechooser():
 
 	def initLayout(self):
 		self.window = QWidget()
-		self.window.setWindowTitle("Choix du dossier")
+		self.window.setWindowTitle("Select a directory")
 		mainGrid = QVBoxLayout()
 
 		self.invalidPathLabel()
@@ -51,31 +51,31 @@ class filechooser():
 	def currentPathLineEdit(self):
 		currentfolder = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 		self.currentPathLineEdit = QLineEdit(currentfolder)
-		self.currentPathLineEdit.setToolTip("Chemin du dossier")
-		self.currentPathLineEdit.setPlaceholderText("Chemin vers le dossier a surveiller")
+		self.currentPathLineEdit.setToolTip("Path of the directory")
+		self.currentPathLineEdit.setPlaceholderText("Path to the directory to monitor")
 
 
 	#Bouton permettant d'ouvrir une popup afin de selectionner le dossier dans l'arborescence
 	def selectDirectoryButton(self):
-		self.selectDirectoryButton = QPushButton("Selectionnez le dossier")
+		self.selectDirectoryButton = QPushButton("Select a directory")
 		self.selectDirectoryButton.setFixedWidth(buttonSize)
 		self.selectDirectoryButton.clicked.connect(self.folderChooser)
 
 
 	def okButton(self):
-		self.okButton = QPushButton("Valider")
+		self.okButton = QPushButton("Ok")
 		self.okButton.setFixedWidth(buttonSize)
 		self.okButton.clicked.connect(self.monitor)
 
 	def quitButton(self):
-		self.quitButton = QPushButton("Quitter")
+		self.quitButton = QPushButton("Quit")
 		self.quitButton.setFixedWidth(buttonSize)
 		self.quitButton.clicked.connect(self.closeChooser)
 		
 
 	#Message d'erreur lorsqu'un path non valide est present dans le currentPathLineEdit
 	def invalidPathLabel(self):
-		self.invalidPathLabel = QLabel("Chemin de dossier non valide")
+		self.invalidPathLabel = QLabel("Invalid path")
 		self.invalidPathLabel.setStyleSheet("QLabel { color : red; }")
 		self.invalidPathLabel.setVisible(False)
 

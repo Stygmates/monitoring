@@ -39,7 +39,7 @@ class monitoring():
 		self.listView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 
 		self.nbFiles = len(self.fileList)
-		self.nbFilesLabel = QtWidgets.QLabel("Nombre de fichiers dans le dossier: " + str(self.nbFiles))
+		self.nbFilesLabel = QtWidgets.QLabel("Number of files with the correct extension inside the directory: " + str(self.nbFiles))
 		
 		self.layout.addWidget(self.nbFilesLabel)
 		self.layout.addWidget(self.listView)
@@ -49,7 +49,7 @@ class monitoring():
 		self.watcher = watcher.watcher(self)
 
 	def nbNecessaryFilesLineEdit(self):
-		self.nbNecessaryFilesLabel = QtWidgets.QLabel("Limite pour le lancement du traitement: ")
+		self.nbNecessaryFilesLabel = QtWidgets.QLabel("Limit before processing: ")
 		self.nbNecessaryFilesLineEdit = QtWidgets.QLineEdit()
 
 		self.layout2.addWidget(self.nbNecessaryFilesLabel)
