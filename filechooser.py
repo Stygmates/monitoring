@@ -40,8 +40,8 @@ class filechooser():
 		#ButtonGroup pour regrouper les radiobox en un group
 
 		self.buttonGroup = QButtonGroup()
-		self.buttonGroup.addButton(self.timeRadioButton)
-		self.buttonGroup.addButton(self.nbFilesRadioButton)
+		self.buttonGroup.addButton(self.timeRadioButton,1)
+		self.buttonGroup.addButton(self.nbFilesRadioButton,2)
 		self.buttonGroup.buttonClicked.connect(self.activateOk)
 
 		#Troisieme ligne avec les boutons ok et quitter
@@ -113,7 +113,12 @@ class filechooser():
 	def monitor(self):
 		if os.path.lexists(self.currentPathLineEdit.text()):
 			self.window.hide()
-			self.Monitor = monitoring.monitoring(self)
+			if self.buttonGroup.checkedId() == 1:
+				self.Monitor = monitoring.monitoring(self)
+			elif self.buttonGroup.checkedId() == 2:
+				print("Fenetre pas encore creee")
+			else:
+				print("Fenetre invalide " + str(self.buttonGroup.checkedId()))
 		else:
 			self.invalidPathLabel.setVisible(True)
 
