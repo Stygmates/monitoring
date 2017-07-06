@@ -19,23 +19,41 @@ class filechooser():
 		mainGrid.addWidget(self.invalidPathLabel)
 
 		grid = QHBoxLayout()
-
 		self.currentPathLineEdit()
 		self.selectDirectoryButton()
-
 		grid.addWidget(self.currentPathLineEdit)
 		grid.addWidget(self.selectDirectoryButton)
 
-		grid2 = QHBoxLayout()
+		#Deuxieme ligne avec les radiobuttons
 
+		#Groupbox = seulement le visuel
+		self.groupBox = QGroupBox("Launch process depending on")
+		self.timeRadioButton = QRadioButton("Time")
+		self.nbFilesRadioButton = QRadioButton("Number of files")
+
+		grid2 = QHBoxLayout()
+		grid2.addWidget(self.timeRadioButton)
+		grid2.addWidget(self.nbFilesRadioButton)
+		grid2.setAlignment(Qt.AlignLeft)
+		self.groupBox.setLayout(grid2)
+
+		#ButtonGroup pour regrouper les radiobox en un group
+
+		self.buttonGroup = QButtonGroup()
+		self.buttonGroup.addButton(self.timeRadioButton)
+		self.buttonGroup.addButton(self.nbFilesRadioButton)
+		self.buttonGroup.buttonClicked.connect(self.activateOk)
+
+		#Troisieme ligne avec les boutons ok et quitter
+		grid3 = QHBoxLayout()
 		self.quitButton()
 		self.okButton()
-
-		grid2.addWidget(self.quitButton)
-		grid2.addWidget(self.okButton)
+		grid3.addWidget(self.quitButton)
+		grid3.addWidget(self.okButton)
 
 		mainGrid.addLayout(grid)
-		mainGrid.addLayout(grid2)
+		mainGrid.addWidget(self.groupBox)
+		mainGrid.addLayout(grid3)
 		self.window.setLayout(mainGrid)
 
 
@@ -66,18 +84,21 @@ class filechooser():
 		self.okButton = QPushButton("Ok")
 		self.okButton.setFixedWidth(buttonSize)
 		self.okButton.clicked.connect(self.monitor)
+		self.okButton.setEnabled(False)
 
 	def quitButton(self):
 		self.quitButton = QPushButton("Quit")
 		self.quitButton.setFixedWidth(buttonSize)
 		self.quitButton.clicked.connect(self.closeChooser)
-		
 
 	#Message d'erreur lorsqu'un path non valide est present dans le currentPathLineEdit
 	def invalidPathLabel(self):
 		self.invalidPathLabel = QLabel("Invalid path")
 		self.invalidPathLabel.setStyleSheet("QLabel { color : red; }")
 		self.invalidPathLabel.setVisible(False)
+
+	def activateOk(self):
+		self.okButton.setEnabled(True)
 
 
 	#Boite de dialogue ouverte lorsque l'on appuie sur le bouton selectDirectoryButton
