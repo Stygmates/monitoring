@@ -114,9 +114,9 @@ class filechooser():
 		if os.path.lexists(self.currentPathLineEdit.text()):
 			self.window.hide()
 			if self.buttonGroup.checkedId() == 1:
-				self.Monitor = monitoring.monitoring(self)
-			elif self.buttonGroup.checkedId() == 2:
 				print("Fenetre pas encore creee")
+			elif self.buttonGroup.checkedId() == 2:
+				self.Monitor = monitoring.monitoring(self)
 			else:
 				print("Fenetre invalide " + str(self.buttonGroup.checkedId()))
 		else:
