@@ -10,7 +10,7 @@
 
 -Ajout de la fonction retour
 
--Ajout de la fonction annuler
+-Ajout de la fonction annuler <b>->Fait pour la surveillance par nombre de fichiers</b>
 
 -Ajout de la fonction quitter
 
