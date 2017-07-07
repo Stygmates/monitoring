@@ -1,4 +1,4 @@
-import monitoring
+import monitoring,finalCountDown
 
 import sys,os,inspect
 from PyQt5.QtCore import *
@@ -114,7 +114,7 @@ class filechooser():
 		if os.path.lexists(self.currentPathLineEdit.text()):
 			self.window.hide()
 			if self.buttonGroup.checkedId() == 1:
-				print("Fenetre pas encore creee")
+				self.Monitor = finalCountDown.finalCountDown(self)
 			elif self.buttonGroup.checkedId() == 2:
 				self.Monitor = monitoring.monitoring(self)
 			else:
