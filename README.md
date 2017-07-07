@@ -6,11 +6,11 @@
 
 <s>-Ajout du bouton de surveillance en fonction du temps</s>
 
--Ajout du lineedit du temps que l'on veut attendre
+<s>-Ajout du lineedit du temps que l'on veut attendre</s>
 
--Ajout de la fonction retour
+<s>-Ajout de la fonction retour</s>
 
--Ajout de la fonction annuler <b>->Fait pour la surveillance par nombre de fichiers</b>
+<s>-Ajout de la fonction annuler<b>->Fait pour la surveillance par nombre de fichiers</b></s>
 
 -Ajout de la fonction quitter
 
@@ -18,4 +18,4 @@
 
 -Voir si on peut afficher les ctf
 
--IMPLEMENTER LA FONCTION PERMETTANT DE GRISER LES BOUTONS EN FONCTION DE L'ETAT ACTUEL DU SYSTEME
+<s>-IMPLEMENTER LA FONCTION PERMETTANT DE GRISER LES BOUTONS EN FONCTION DE L'ETAT ACTUEL DU SYSTEME</s>
