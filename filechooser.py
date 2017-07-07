@@ -27,7 +27,7 @@ class filechooser():
 		#Deuxieme ligne avec les radiobuttons
 
 		#Groupbox = seulement le visuel
-		self.groupBox = QGroupBox("Launch process depending on")
+		self.groupBox = QGroupBox("Start process depending on")
 		self.timeRadioButton = QRadioButton("Time")
 		self.nbFilesRadioButton = QRadioButton("Number of files")
 

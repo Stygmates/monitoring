@@ -12,9 +12,11 @@ class finalCountDown():
 		self.mainLayout.addWidget(self.clock)
 		self.mainLayout.addLayout(self.timeInputLayout)
 		layout = QtWidgets.QHBoxLayout()
-		self.launchButton = self.launchButton()
-		self.cancelButton = self.cancelButton()
+		self.quitButton = self.quitButton()
 		self.backButton = self.backButton()
+		self.cancelButton = self.cancelButton()
+		self.launchButton = self.launchButton()
+		layout.addWidget(self.quitButton)
 		layout.addWidget(self.backButton)
 		layout.addWidget(self.cancelButton)
 		layout.addWidget(self.launchButton)
@@ -72,11 +74,18 @@ class finalCountDown():
 		backButton.clicked.connect(self.backFunction)
 		return backButton
 
+	def quitButton(self):
+		quitButton = QtWidgets.QPushButton("Quit")
+		quitButton.clicked.connect(self.quitFunction)
+		return quitButton
+
 	def backFunction(self):
 		self.window.close()
 		self.timer.stop()
 		self.parent.window.show()
 
+	def quitFunction(self):
+		self.parent.app.quit()
 
 	def updateTimer(self):
 
@@ -97,6 +106,7 @@ class finalCountDown():
 		self.cancelButton.setEnabled(False)
 		self.clock.display("00:00")
 
+
 	def affichage(self):
 		if self.minutesLeft == 0:
 			if self.hoursLeft > 0:
@@ -116,5 +126,8 @@ class finalCountDown():
 
 	def startProcessing(self):
 		print("Starting process")
+
+
+
 if __name__ == '__main__':
 	finalCountDown = finalCountDown()

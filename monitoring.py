@@ -26,7 +26,7 @@ class monitoring():
 		self.nbNecessaryFilesSpinBox()
 		self.okButton()
 		self.returnButton()
-		self.returnButton.clicked.connect(self.returnFunction)
+		self.quitButton()
 
 		self.mainLayout.addLayout(self.layout)
 		self.verticalLayout.addWidget(self.groupBox)
@@ -68,8 +68,17 @@ class monitoring():
 
 	def returnButton(self):
 		self.returnButton = QtWidgets.QPushButton("Return")
+		self.returnButton.clicked.connect(self.returnFunction)
 		self.layout3.addWidget(self.returnButton)
+
+	def quitButton(self):
+		self.quitButton = QtWidgets.QPushButton("Quit")
+		self.quitButton.clicked.connect(self.quitFunction)
+		self.layout3.addWidget(self.quitButton)
 
 	def returnFunction(self):
 		self.window.close()
 		self.parent.window.show()
+
+	def quitFunction(self):
+		self.parent.app.quit()
