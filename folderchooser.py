@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import *
 buttonSize = 200
 
 #Classe de l'interface qui s'occupe de choisir le dossier qui sera surveille
-class filechooser():
+class folderchooser():
 
 	def initLayout(self):
 		self.window = QWidget()
