@@ -17,9 +17,9 @@ class watcher():
 		self.parent.nbFiles = len(fileList)
 		self.parent.nbFilesLabel.setText("Number of files with the correct extension inside the directory: " + str(self.parent.nbFiles))
 		if self.parent.launched == True:
-			print("Launched!")
 			if self.parent.maxValue <= self.parent.nbFiles:
 				self.parent.postProcess()
+				self.parent.launched = False
 
 
 
