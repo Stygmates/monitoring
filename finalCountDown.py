@@ -25,23 +25,25 @@ class finalCountDown():
 		self.window.setLayout(self.mainLayout)
 		self.window.show()
 
+
+	#Initialisation de l'affichage
 	def clock(self):
 		clock = QtWidgets.QLCDNumber()
 		clock.setSegmentStyle(QtWidgets.QLCDNumber.Flat)
 		clock.display("00:00")
 		return clock
 
+	#Initialisation du timer
 	def timer(self):
 		self.timer = QtCore.QTimer()
 		self.timer.setInterval(1000)
 		self.timer.timeout.connect(self.affichage)
 
+	#Lancement du timer
 	def startTimer(self):
-		self.timer = QtCore.QTimer()
-		self.timer.setInterval(1000)
-		self.timer.timeout.connect(self.affichage)
 		self.timer.start()
 
+	#Layout contenant les spinbox permettant d'initialiser les heures et minutes du timer
 	def timeInputLayout(self):
 		labelHours = QtWidgets.QLabel(" hours")
 		labelminutes = QtWidgets.QLabel(" minutes")
@@ -59,7 +61,7 @@ class finalCountDown():
 
 	def launchButton(self):
 		okButton = QtWidgets.QPushButton("Launch timer before processing")
-		okButton.clicked.connect(self.updateTimer)
+		okButton.clicked.connect(self.initTimer)
 		self.clock.setStyleSheet("background-color: black;color:green;")
 		return okButton
 
@@ -87,10 +89,10 @@ class finalCountDown():
 	def quitFunction(self):
 		self.parent.app.quit()
 
-	def updateTimer(self):
+	#Initialise le timer et lance le process fait avant le lancement du timer
+	def initTimer(self):
 
-		#LANCER ICI LE TRAITEMENT AVANT ATTENTE
-
+		self.preProcess()
 
 		self.hoursLeft = self.hours.value()
 		self.minutesLeft = self.minutes.value()
@@ -113,7 +115,7 @@ class finalCountDown():
 				self.minutesLeft = 59
 				self.hoursLeft = self.hoursLeft - 1
 			else:
-				self.startProcessing()
+				self.postProcess()
 				self.timer.stop()
 				self.clock.setStyleSheet("background-color: black;color: green;")
 				self.launchButton.setEnabled(True)
@@ -124,10 +126,8 @@ class finalCountDown():
 		time = str(self.hoursLeft) + ":" + str(self.minutesLeft)
 		self.clock.display(time)
 
-	def startProcessing(self):
-		print("Starting process")
+	def preProcess(self):
+		print("Lancement du pre-process")
 
-
-
-if __name__ == '__main__':
-	finalCountDown = finalCountDown()
+	def postProcess(self):
+		print("Lancement du post-process")

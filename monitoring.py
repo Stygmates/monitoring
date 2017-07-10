@@ -10,6 +10,9 @@ class monitoring():
 		self.window = QtWidgets.QWidget()
 		self.path = self.parent.currentPathLineEdit.text()
 
+		#Variable servant a verifier si le watcher est lance pour le dossier 
+		self.launched = False
+
 		#Creation des layouts
 		self.mainLayout = QtWidgets.QHBoxLayout()
 		self.layout = QtWidgets.QVBoxLayout()
@@ -25,6 +28,7 @@ class monitoring():
 		#Deuxieme colonne
 		self.nbNecessaryFilesSpinBox()
 		self.okButton()
+		self.cancelButton()
 		self.returnButton()
 		self.quitButton()
 
@@ -36,6 +40,7 @@ class monitoring():
 		self.window.show()
 
 
+	#La liste des fichiers dans le dossier
 	def initListView(self):
 		self.listView = QtWidgets.QListView()
 
@@ -52,6 +57,7 @@ class monitoring():
 		self.layout.addWidget(self.listView)
 
 
+	#Le watcher qui affiche la liste des fichiers et qui lance egalement le postprocessing lorsque le nombre de fichiers necessaire est atteint dans le dossier
 	def startWatcher(self):
 		self.watcher = watcher.watcher(self)
 
@@ -64,7 +70,14 @@ class monitoring():
 
 	def okButton(self):
 		self.okButton = QtWidgets.QPushButton("Ok")
+		self.okButton.clicked.connect(self.okFunction)
 		self.layout3.addWidget(self.okButton)
+
+	def cancelButton(self):
+		self.cancelButton = QtWidgets.QPushButton("Cancel")
+		self.cancelButton.setEnabled(False)
+		self.cancelButton.clicked.connect(self.cancelFunction)
+		self.layout3.addWidget(self.cancelButton)
 
 	def returnButton(self):
 		self.returnButton = QtWidgets.QPushButton("Return")
@@ -76,9 +89,34 @@ class monitoring():
 		self.quitButton.clicked.connect(self.quitFunction)
 		self.layout3.addWidget(self.quitButton)
 
+	def okFunction(self):
+		self.preProcess()
+		self.okButton.setEnabled(False)
+		self.cancelButton.setEnabled(True)
+		self.launched = True
+		self.maxValue = self.nbNecessaryFilesSpinBox.value()
+		if self.maxValue < self.nbFiles:
+			self.postProcess()
+
+	def cancelFunction(self):
+		self.okButton.setEnabled(True)
+		self.cancelButton.setEnabled(False)
+		self.launched = False
+
 	def returnFunction(self):
 		self.window.close()
 		self.parent.window.show()
 
 	def quitFunction(self):
 		self.parent.app.quit()
+
+
+	#Fonction lancee avant l'attente du nombre de fichiers requis dans le repertoire
+	def preProcess(self):
+		print("Lancement du pre-processing")
+
+
+	#Process lance une fois que la limite du nombre de fichiers est atteint
+	def postProcess(self):
+		print("Lancement du post-processing")
+		#TODO : Reactiver le bouton ok, desactiver le bouton cancel et remettre variable launched a False

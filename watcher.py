@@ -15,11 +15,17 @@ class watcher():
 		model = QtCore.QStringListModel(fileList)
 		self.parent.listView.setModel(model)
 		self.parent.nbFiles = len(fileList)
-		self.parent.nbFilesLabel.setText("Nombre de fichiers dans le dossier: " + str(self.parent.nbFiles))
+		self.parent.nbFilesLabel.setText("Number of files with the correct extension inside the directory: " + str(self.parent.nbFiles))
+		if self.parent.launched == True:
+			print("Launched!")
+			if self.parent.maxValue <= self.parent.nbFiles:
+				self.parent.postProcess()
+
+
 
 
 	def __init__(self, parent):
 		self.parent = parent
 		self.path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 		self.watcher = QtCore.QFileSystemWatcher([self.path])
-		self.watcher.directoryChanged.connect(self.update)    
+		self.watcher.directoryChanged.connect(self.update)

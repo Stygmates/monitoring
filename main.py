@@ -1,7 +1,7 @@
-import filechooser
+import folderchooser
 
 
 if __name__ == '__main__':
 	
-	Chooser = filechooser.filechooser()
+	Chooser = folderchooser.folderchooser()
 	Chooser.display()
