@@ -22,4 +22,4 @@
 
 -Ajout des processus se faisant avant/après la condition de continuer le processus
 
--Ajout de la condition sur le nombre de fichiers
+<s>-Ajout de la condition sur le nombre de fichiers</s>
