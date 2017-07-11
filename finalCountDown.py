@@ -1,8 +1,10 @@
-import sys
+import sys,os
 from PyQt5 import QtWidgets, QtCore
 class finalCountDown():
 	def __init__(self,parent):
 		self.parent = parent
+		self.extension = self.parent.extension
+		self.path = self.parent.currentPathLineEdit.text()
 
 		self.window = QtWidgets.QWidget()
 		self.clock = self.clock()
@@ -11,6 +13,7 @@ class finalCountDown():
 		self.mainLayout = QtWidgets.QVBoxLayout()
 		self.mainLayout.addWidget(self.clock)
 		self.mainLayout.addLayout(self.timeInputLayout)
+		self.initListView()
 		layout = QtWidgets.QHBoxLayout()
 		self.quitButton = self.quitButton()
 		self.backButton = self.backButton()
@@ -125,6 +128,22 @@ class finalCountDown():
 			self.minutesLeft = self.minutesLeft - 1
 		time = str(self.hoursLeft) + ":" + str(self.minutesLeft)
 		self.clock.display(time)
+
+	#La liste des fichiers dans le dossier
+	def initListView(self):
+		self.listView = QtWidgets.QListView()
+
+		self.fileList = [f for f in os.listdir(self.path) if f.endswith(self.extension)]
+
+		model = QtCore.QStringListModel(self.fileList)
+		self.listView.setModel(model)
+		self.listView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+
+		self.nbFiles = len(self.fileList)
+		self.nbFilesLabel = QtWidgets.QLabel("Files with the \"" + self.extension + "\" extension: "+ str(self.nbFiles))
+		
+		self.mainLayout.addWidget(self.nbFilesLabel)
+		self.mainLayout.addWidget(self.listView)
 
 	def preProcess(self):
 		print("Lancement du pre-process")
