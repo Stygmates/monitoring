@@ -91,7 +91,7 @@ class folderchooser():
 
 	def extensionLineEdit(self):
 		extensionLineEdit = QLineEdit('.tif')
-		extensionLineEdit.setToolTip("Extension of the files to watch out")
+		extensionLineEdit.setToolTip("File extension of the files to watch out")
 		extensionLineEdit.setPlaceholderText("Extension")
 		return extensionLineEdit
 
@@ -124,7 +124,8 @@ class folderchooser():
 	def folderChooser(self):
 		currentfolder = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 		dir = QFileDialog.getExistingDirectory(None, 'Select a folder:', currentfolder, QFileDialog.ShowDirsOnly)
-		self.currentPathLineEdit.setText(dir)
+		if len(dir) > 0:
+			self.currentPathLineEdit.setText(dir)
 
 	def closeChooser(self):
 		self.app.quit()
