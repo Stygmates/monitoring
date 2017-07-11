@@ -44,6 +44,13 @@ class folderchooser():
 		self.buttonGroup.addButton(self.nbFilesRadioButton,2)
 		self.buttonGroup.buttonClicked.connect(self.activateOk)
 
+		extensionLabel = QLabel("Extension to monitor")
+		self.extensionLineEdit = self.extensionLineEdit()
+		extensionLayout = QVBoxLayout()
+		extensionLayout.addWidget(extensionLabel)
+		extensionLayout.addWidget(self.extensionLineEdit)
+
+
 		#Troisieme ligne avec les boutons ok et quitter
 		grid3 = QHBoxLayout()
 		self.quitButton()
@@ -53,6 +60,7 @@ class folderchooser():
 
 		mainGrid.addLayout(grid)
 		mainGrid.addWidget(self.groupBox)
+		mainGrid.addLayout(extensionLayout)
 		mainGrid.addLayout(grid3)
 		self.window.setLayout(mainGrid)
 
@@ -78,6 +86,12 @@ class folderchooser():
 		self.selectDirectoryButton = QPushButton("Select a directory")
 		self.selectDirectoryButton.setFixedWidth(buttonSize)
 		self.selectDirectoryButton.clicked.connect(self.folderChooser)
+
+	def extensionLineEdit(self):
+		extensionLineEdit = QLineEdit('.tif')
+		extensionLineEdit.setToolTip("Extension of the files to watch out")
+		extensionLineEdit.setPlaceholderText("Extension")
+		return extensionLineEdit
 
 
 	def okButton(self):
@@ -111,6 +125,7 @@ class folderchooser():
 		self.app.quit()
 
 	def monitor(self):
+		self.extension = self.extensionLineEdit.text()
 		if os.path.lexists(self.currentPathLineEdit.text()):
 			self.window.hide()
 			if self.buttonGroup.checkedId() == 1:

@@ -11,11 +11,11 @@ class watcher():
 	#TODO : modifier la fonction de filtrage pour qu'elle soit plus propre, il y a peut-etre une fonction qui permet de le faire sans utiliser une boucle sur un tableau
 	#Entree: Le path du dossier qui est surveille
 	def update(self, path):
-		fileList = [f for f in os.listdir(self.path) if f.endswith('.txt')]
+		fileList = [f for f in os.listdir(self.path) if f.endswith(self.extension)]
 		model = QtCore.QStringListModel(fileList)
 		self.parent.listView.setModel(model)
 		self.parent.nbFiles = len(fileList)
-		self.parent.nbFilesLabel.setText("Number of files with the correct extension inside the directory: " + str(self.parent.nbFiles))
+		self.parent.nbFilesLabel.setText("Files with the \"" + self.extension + "\" extension: "+ str(self.parent.nbFiles))
 		if self.parent.launched == True:
 			if self.parent.maxValue <= self.parent.nbFiles:
 				self.parent.postProcess()
@@ -29,3 +29,4 @@ class watcher():
 		self.path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 		self.watcher = QtCore.QFileSystemWatcher([self.path])
 		self.watcher.directoryChanged.connect(self.update)
+		self.extension = self.parent.extension

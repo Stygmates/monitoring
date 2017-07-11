@@ -9,6 +9,7 @@ class monitoring():
 		self.parent = parent
 		self.window = QtWidgets.QWidget()
 		self.path = self.parent.currentPathLineEdit.text()
+		self.extension = self.parent.extension
 
 		#Variable servant a verifier si le watcher est lance pour le dossier 
 		self.launched = False
@@ -29,7 +30,7 @@ class monitoring():
 		self.nbNecessaryFilesSpinBox()
 		self.okButton()
 		self.cancelButton()
-		self.returnButton()
+		self.backButton()
 		self.quitButton()
 
 		self.mainLayout.addLayout(self.layout)
@@ -44,14 +45,14 @@ class monitoring():
 	def initListView(self):
 		self.listView = QtWidgets.QListView()
 
-		self.fileList = [f for f in os.listdir(self.path) if f.endswith('.txt')]
+		self.fileList = [f for f in os.listdir(self.path) if f.endswith(self.extension)]
 
 		model = QtCore.QStringListModel(self.fileList)
 		self.listView.setModel(model)
 		self.listView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 
 		self.nbFiles = len(self.fileList)
-		self.nbFilesLabel = QtWidgets.QLabel("Number of files with the correct extension inside the directory: " + str(self.nbFiles))
+		self.nbFilesLabel = QtWidgets.QLabel("Files with the \"" + self.extension + "\" extension: "+ str(self.nbFiles))
 		
 		self.layout.addWidget(self.nbFilesLabel)
 		self.layout.addWidget(self.listView)
@@ -79,10 +80,10 @@ class monitoring():
 		self.cancelButton.clicked.connect(self.cancelFunction)
 		self.layout3.addWidget(self.cancelButton)
 
-	def returnButton(self):
-		self.returnButton = QtWidgets.QPushButton("Return")
-		self.returnButton.clicked.connect(self.returnFunction)
-		self.layout3.addWidget(self.returnButton)
+	def backButton(self):
+		self.backButton = QtWidgets.QPushButton("Back")
+		self.backButton.clicked.connect(self.backFunction)
+		self.layout3.addWidget(self.backButton)
 
 	def quitButton(self):
 		self.quitButton = QtWidgets.QPushButton("Quit")
@@ -103,7 +104,7 @@ class monitoring():
 		self.cancelButton.setEnabled(False)
 		self.launched = False
 
-	def returnFunction(self):
+	def backFunction(self):
 		self.window.close()
 		self.parent.window.show()
 
