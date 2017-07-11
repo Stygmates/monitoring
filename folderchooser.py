@@ -15,12 +15,12 @@ class folderchooser():
 		self.window.setWindowTitle("Select a directory")
 		mainGrid = QVBoxLayout()
 
-		self.invalidPathLabel()
+		self.invalidPathLabel = self.invalidPathLabel()
 		mainGrid.addWidget(self.invalidPathLabel)
 
 		grid = QHBoxLayout()
-		self.currentPathLineEdit()
-		self.selectDirectoryButton()
+		self.currentPathLineEdit = self.currentPathLineEdit()
+		self.selectDirectoryButton = self.selectDirectoryButton()
 		grid.addWidget(self.currentPathLineEdit)
 		grid.addWidget(self.selectDirectoryButton)
 
@@ -53,8 +53,8 @@ class folderchooser():
 
 		#Troisieme ligne avec les boutons ok et quitter
 		grid3 = QHBoxLayout()
-		self.quitButton()
-		self.okButton()
+		self.quitButton = self.quitButton()
+		self.okButton = self.okButton()
 		grid3.addWidget(self.quitButton)
 		grid3.addWidget(self.okButton)
 
@@ -76,16 +76,18 @@ class folderchooser():
 	#Le lineedit qui contient le chemin du dossier que l'on a choisi
 	def currentPathLineEdit(self):
 		currentfolder = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-		self.currentPathLineEdit = QLineEdit(currentfolder)
-		self.currentPathLineEdit.setToolTip("Path of the directory")
-		self.currentPathLineEdit.setPlaceholderText("Path to the directory to monitor")
+		currentPathLineEdit = QLineEdit(currentfolder)
+		currentPathLineEdit.setToolTip("Path of the directory")
+		currentPathLineEdit.setPlaceholderText("Path to the directory to monitor")
+		return currentPathLineEdit
 
 
 	#Bouton permettant d'ouvrir une popup afin de selectionner le dossier dans l'arborescence
 	def selectDirectoryButton(self):
-		self.selectDirectoryButton = QPushButton("Select a directory")
-		self.selectDirectoryButton.setFixedWidth(buttonSize)
-		self.selectDirectoryButton.clicked.connect(self.folderChooser)
+		selectDirectoryButton = QPushButton("Select a directory")
+		selectDirectoryButton.setFixedWidth(buttonSize)
+		selectDirectoryButton.clicked.connect(self.folderChooser)
+		return selectDirectoryButton
 
 	def extensionLineEdit(self):
 		extensionLineEdit = QLineEdit('.tif')
@@ -95,21 +97,24 @@ class folderchooser():
 
 
 	def okButton(self):
-		self.okButton = QPushButton("Ok")
-		self.okButton.setFixedWidth(buttonSize)
-		self.okButton.clicked.connect(self.monitor)
-		self.okButton.setEnabled(False)
+		okButton = QPushButton("Ok")
+		okButton.setFixedWidth(buttonSize)
+		okButton.clicked.connect(self.monitor)
+		okButton.setEnabled(False)
+		return okButton
 
 	def quitButton(self):
-		self.quitButton = QPushButton("Quit")
-		self.quitButton.setFixedWidth(buttonSize)
-		self.quitButton.clicked.connect(self.closeChooser)
+		quitButton = QPushButton("Quit")
+		quitButton.setFixedWidth(buttonSize)
+		quitButton.clicked.connect(self.closeChooser)
+		return quitButton
 
 	#Message d'erreur lorsqu'un path non valide est present dans le currentPathLineEdit
 	def invalidPathLabel(self):
-		self.invalidPathLabel = QLabel("Invalid path")
-		self.invalidPathLabel.setStyleSheet("QLabel { color : red; }")
-		self.invalidPathLabel.setVisible(False)
+		invalidPathLabel = QLabel("Invalid path")
+		invalidPathLabel.setStyleSheet("QLabel { color : red; }")
+		invalidPathLabel.setVisible(False)
+		return invalidPathLabel
 
 	def activateOk(self):
 		self.okButton.setEnabled(True)
