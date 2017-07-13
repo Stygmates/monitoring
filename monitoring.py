@@ -15,10 +15,9 @@ class monitoring():
 		self.launched = False
 
 		#Creation des layouts
-		self.mainLayout = QtWidgets.QHBoxLayout()
+		self.mainLayout = QtWidgets.QVBoxLayout()
 		self.layout = QtWidgets.QVBoxLayout()
-		self.layout2 = QtWidgets.QVBoxLayout()
-		self.layout3 = QtWidgets.QVBoxLayout()
+		self.spinBoxLayout = QtWidgets.QVBoxLayout()
 		self.verticalLayout = QtWidgets.QVBoxLayout()
 		
 		#initialisation de tous les widgets
@@ -28,14 +27,16 @@ class monitoring():
 
 		#Deuxieme colonne
 		self.nbNecessaryFilesSpinBox()
-		self.okButton()
-		self.cancelButton()
-		self.backButton()
-		self.quitButton()
+		self.okButton = self.okButton()
+		self.cancelButton = self.cancelButton()
+		self.backButton = self.backButton()
+		self.quitButton = self.quitButton()
+
+		self.buttonsLayout = self.buttonsLayout()
 
 		self.mainLayout.addLayout(self.layout)
 		self.verticalLayout.addWidget(self.groupBox)
-		self.verticalLayout.addLayout(self.layout3)
+		self.verticalLayout.addLayout(self.buttonsLayout)
 		self.mainLayout.addLayout(self.verticalLayout)
 		self.window.setLayout(self.mainLayout)
 		self.window.show()
@@ -63,32 +64,40 @@ class monitoring():
 		self.watcher = watcher.watcher(self)
 
 	def nbNecessaryFilesSpinBox(self):
-		self.groupBox = QtWidgets.QGroupBox("Limit before processing: ")
+		self.groupBox = QtWidgets.QGroupBox("File number limit before processing: ")
 		self.nbNecessaryFilesSpinBox = QtWidgets.QSpinBox()
 		self.nbNecessaryFilesSpinBox.setMaximum(1000)
-		self.layout2.addWidget(self.nbNecessaryFilesSpinBox)
-		self.groupBox.setLayout(self.layout2)
+		self.spinBoxLayout.addWidget(self.nbNecessaryFilesSpinBox)
+		self.groupBox.setLayout(self.spinBoxLayout)
 
 	def okButton(self):
-		self.okButton = QtWidgets.QPushButton("Ok")
-		self.okButton.clicked.connect(self.okFunction)
-		self.layout3.addWidget(self.okButton)
+		okButton = QtWidgets.QPushButton("Ok")
+		okButton.clicked.connect(self.okFunction)
+		return okButton
 
 	def cancelButton(self):
-		self.cancelButton = QtWidgets.QPushButton("Cancel")
-		self.cancelButton.setEnabled(False)
-		self.cancelButton.clicked.connect(self.cancelFunction)
-		self.layout3.addWidget(self.cancelButton)
+		cancelButton = QtWidgets.QPushButton("Cancel")
+		cancelButton.setEnabled(False)
+		cancelButton.clicked.connect(self.cancelFunction)
+		return cancelButton
 
 	def backButton(self):
-		self.backButton = QtWidgets.QPushButton("Back")
-		self.backButton.clicked.connect(self.backFunction)
-		self.layout3.addWidget(self.backButton)
+		backButton = QtWidgets.QPushButton("Back")
+		backButton.clicked.connect(self.backFunction)
+		return backButton
 
 	def quitButton(self):
-		self.quitButton = QtWidgets.QPushButton("Quit")
-		self.quitButton.clicked.connect(self.quitFunction)
-		self.layout3.addWidget(self.quitButton)
+		quitButton = QtWidgets.QPushButton("Quit")
+		quitButton.clicked.connect(self.quitFunction)
+		return quitButton
+
+	def buttonsLayout(self):
+		buttonsLayout = QtWidgets.QHBoxLayout()
+		buttonsLayout.addWidget(self.quitButton)
+		buttonsLayout.addWidget(self.backButton)
+		buttonsLayout.addWidget(self.cancelButton)
+		buttonsLayout.addWidget(self.okButton)
+		return buttonsLayout
 
 	def okFunction(self):
 		self.preProcess()
@@ -96,7 +105,7 @@ class monitoring():
 		self.cancelButton.setEnabled(True)
 		self.launched = True
 		self.maxValue = self.nbNecessaryFilesSpinBox.value()
-		if self.maxValue < self.nbFiles:
+		if self.maxValue <= self.nbFiles:
 			self.postProcess()
 
 	def cancelFunction(self):
