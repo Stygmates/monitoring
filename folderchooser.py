@@ -141,7 +141,7 @@ class folderchooser():
 			# 	self.Monitor = monitoring.monitoring(self)
 			# else:
 			# 	print("Fenetre invalide " + str(self.buttonGroup.checkedId()))
-			self.table = table.table(self, self.currentPathLineEdit.text(),'cor.mrc')
+			self.table = table.table(self, self.currentPathLineEdit.text(),'tif')
 		else:
 			self.invalidPathLabel.setVisible(True)
 

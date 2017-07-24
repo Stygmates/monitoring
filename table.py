@@ -65,16 +65,20 @@ class table():
 		regex = re.compile(self.filterLineEdit.text())
 		filteredList = list(filter(regex.search, fileList))
 		for i in range(0,len(filteredList)):
-			filename = filteredList[i][:-12]
+			filename = filteredList[i][:-4]
 			filenameItem = QtWidgets.QTableWidgetItem(filename)
 			#Image
 			ctfItem = QtWidgets.QTableWidgetItem()
-			ctfpixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.ctf").scaled(300, 300)
+			ctfpixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.ctf")
+			if ctfpixmap is not None:
+				ctfpixmap = ctfpixmap.scaled(300,300)
 			ctf = QtGui.QPixmap(ctfpixmap)
 			ctfItem.setData(Qt.Qt.DecorationRole, ctf)
 
 			mrcItem = QtWidgets.QTableWidgetItem()
-			mrcpixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.mrc").scaled(300, 300)
+			mrcpixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.mrc")
+			if mrcpixmap is not None:
+				mrcpixmap = mrcpixmap.scaled(300,300)
 			mrc = QtGui.QPixmap(mrcpixmap)
 			mrcItem.setData(Qt.Qt.DecorationRole, mrc)
 
@@ -88,8 +92,9 @@ class table():
 			self.tableWidget.insertRow(self.tableWidget.rowCount())
 			self.tableWidget.setItem(i, 0, filenameItem)
 			self.tableWidget.setItem(i, 1, ctfItem)
-			self.tableWidget.setItem(i, 2, mrcItem)
+			#self.tableWidget.setItem(i, 2, mrcItem)
 			self.tableWidget.setItem(i, 3, statsItem)
+		self.tableWidget.sortItems(0)
 
 	def filterLineEdit(self):
 		filterLineEdit = QtWidgets.QLineEdit()
