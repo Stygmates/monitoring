@@ -5,9 +5,12 @@ import iomrc
 import parser
 class table():
 
-	def __init__(self, path, extension):
+	def __init__(self, parent, path, extension):
+		self.parent = parent
+		self.window = QtWidgets.QWidget()
+
 		self.widgetsSize = 100
-		self.path = path
+		self.path = path + "/"
 		self.extension = extension
 		self.centeredLayout = QtWidgets.QVBoxLayout()
 		self.centeredLayout.setAlignment(Qt.Qt.AlignCenter)
@@ -37,6 +40,9 @@ class table():
 		self.mainLayout.addLayout(self.centeredLayout)
 
 		self.watcher = tablewatcher.watcher(self)
+
+		self.window.setLayout(self.mainLayout)
+		self.window.show()
 
 	def tableWidget(self):
 		tableWidget = QtWidgets.QTableWidget()
@@ -99,7 +105,8 @@ class table():
 		return backButton
 
 	def backFunction(self):
-		print("Back Function")
+		self.window.close()
+		self.parent.window.show()
 
 	def quitButton(self):
 		quitButton = QtWidgets.QPushButton("Quit")
@@ -108,15 +115,15 @@ class table():
 		return quitButton
 
 	def quitFunction(self):
-		print("Quit Function")
+		self.parent.app.quit()
 
 
 
-if __name__ == '__main__':
-	app = QtWidgets.QApplication(sys.argv)
-	window = QtWidgets.QWidget()
-	mainLayout = QtWidgets.QGridLayout()
-	table = table('/home/tandat/test2/','cor.mrc')
-	window.setLayout(table.mainLayout)
-	window.show()
-	sys.exit(app.exec_())
+# if __name__ == '__main__':
+# 	app = QtWidgets.QApplication(sys.argv)
+# 	window = QtWidgets.QWidget()
+# 	mainLayout = QtWidgets.QGridLayout()
+# 	table = table('/home/tandat/test2/','cor.mrc')
+# 	window.setLayout(table.mainLayout)
+# 	window.show()
+# 	sys.exit(app.exec_())
