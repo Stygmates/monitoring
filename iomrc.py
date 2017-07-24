@@ -6,10 +6,12 @@ import sys
 #pip install --user mrcfile
 
 def getpixmap(filename):
-	print("Ok")
-	mrc = mrcfile.open(filename)
-	print("What")
-	image = toimage(mrc.data)
+	mrc = mrcfile.open(filename, permissive=True)
+	if(filename.endswith(".ctf")):
+		data2 = mrc.data[0]
+	else:
+		data2 = mrc.data
+	image = toimage(data2)
 	qimage = ImageQt(image)
 	pix = QtGui.QPixmap.fromImage(qimage)
 	mrc.close()
