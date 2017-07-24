@@ -23,3 +23,11 @@
 -Ajout des processus se faisant avant/après la condition de continuer le processus
 
 <s>-Ajout de la condition sur le nombre de fichiers</s>
+
+Liste des dépendances
+
+-sudo apt-get install python3-scipy
+
+- sudo apt-get install python3-pil
+
+- pip3 install mrcfile
