@@ -17,6 +17,7 @@ def getpixmap(filename):
 		pix = QtGui.QPixmap.fromImage(qimage)
 		mrc.close()
 		return pix
-	except OSError as e:
-		print(e)
+	except Exception:
 		return None
+	except RuntimeWarning:
+		print("Nope")
