@@ -51,16 +51,18 @@ class table():
 
 
 	def tableWidget(self):
+		colomnWidth = 300
 		tableWidget = QtWidgets.QTableWidget()
-		headerList = ["File name","Ctf","Corresponding mrc","Parameters"]
+		headerList = ["","File name","Ctf","Corresponding mrc","Parameters"]
 		tableWidget.setColumnCount(len(headerList))
 		tableWidget.setRowCount(0)
 		tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-		tableWidget.setFixedHeight(len(headerList)*300)
-		tableWidget.setFixedWidth(len(headerList)*300)
+		tableWidget.setFixedHeight(900)
+		tableWidget.setFixedWidth((len(headerList)-1)*colomnWidth+20)
 		tableWidget.setHorizontalHeaderLabels(headerList)
-		for i in range(0,len(headerList)):
-			tableWidget.setColumnWidth(i,300)
+		for i in range(1,len(headerList)+1):
+			tableWidget.setColumnWidth(i,colomnWidth)
+		tableWidget.setColumnWidth(0,20)
 		return tableWidget
 
 	def updateList(self):
@@ -79,15 +81,13 @@ class table():
 			filenameItem = QtWidgets.QTableWidgetItem(filename)
 			#Image
 
-			statslog = self.path + filename + "_sum-cor_gctf.log"
-			stats = parser.getStats(self,statslog)
-			if stats is None:
-				statsItem = QtWidgets.QTableWidgetItem("Defocus U:\nDefocus V:\n Phase shift: ")
-			else:
-				statsItem = QtWidgets.QTableWidgetItem("Defocus U: " + stats[0] + "\nDefocus V: " + stats[1] + "\n Phase shift: " + stats[3])
+			checkBox = QtWidgets.QCheckBox()
 			
-			self.tableWidget.setItem(i, 0, filenameItem)
-			self.tableWidget.setItem(i, 3, statsItem)
+			self.tableWidget.setCellWidget(i, 0, checkBox)
+			self.tableWidget.setItem(i, 1, filenameItem)
+			worker1 = threads.Worker(self.loadstats, filename, i)
+			worker1.signals.result.connect(self.updatestats)
+			self.threadpool.start(worker1)
 
 			worker = threads.Worker(self.loadmrc, filename, i)
 			worker.signals.result.connect(self.updatemrc)
@@ -98,12 +98,26 @@ class table():
 
 		self.tableWidget.sortItems(0)
 
+	def updatestats(self, result):
+		self.tableWidget.setItem(result[1], 4, result[0])
+
+	def loadstats(self,filename,index):
+		statslog = self.path + filename + "_sum-cor_gctf.log"
+		stats = parser.getStats(self,statslog)
+		if stats is None:
+			statsItem = QtWidgets.QTableWidgetItem("Defocus U:\nDefocus V:\n Phase shift: ")
+		else:
+			statsItem = QtWidgets.QTableWidgetItem("Defocus U: " + stats[0] + "\nDefocus V: " + stats[1] + "\nPhase shift: " + stats[3])
+		return [statsItem,index]
+			
 
 	def updatemrc(self,result):
-		self.tableWidget.setItem(result[1], 2, result[0])
+		if result is not None:
+			self.tableWidget.setItem(result[1], 3, result[0])
 
 	def updatectf(self,result):
-		self.tableWidget.setItem(result[1], 1, result[0])
+		if result is not None:
+			self.tableWidget.setItem(result[1], 2, result[0])
 		
 	def loadmrc(self, filename, index):
 		mrcItem = QtWidgets.QTableWidgetItem()
@@ -112,7 +126,7 @@ class table():
 			mrcpixmap = mrcpixmap.scaled(300,300)
 			mrc = QtGui.QPixmap(mrcpixmap)
 			mrcItem.setData(Qt.Qt.DecorationRole, mrc)
-			return [mrcItem, index]
+			return [mrcItem,index]
 		else:
 			return
 
@@ -123,7 +137,7 @@ class table():
 			ctfpixmap = ctfpixmap.scaled(300,300)
 			ctf = QtGui.QPixmap(ctfpixmap)
 			ctfItem.setData(Qt.Qt.DecorationRole, ctf)
-			return [ctfItem, index]
+			return [ctfItem,index]
 		else:
 			return
 
