@@ -11,7 +11,7 @@ buttonSize = 200
 #Classe de l'interface qui s'occupe de choisir le dossier qui sera surveille
 class folderchooser():
 
-	def initLayout(self):
+	def initLayout(self,path):
 		self.window = QWidget()
 		self.window.setWindowTitle("Select a directory")
 		mainGrid = QVBoxLayout()
@@ -20,7 +20,7 @@ class folderchooser():
 		mainGrid.addWidget(self.invalidPathLabel)
 
 		grid = QHBoxLayout()
-		self.currentPathLineEdit = self.currentPathLineEdit()
+		self.currentPathLineEdit = self.currentPathLineEdit(path)
 		self.selectDirectoryButton = self.selectDirectoryButton()
 		grid.addWidget(self.currentPathLineEdit)
 		grid.addWidget(self.selectDirectoryButton)
@@ -66,17 +66,19 @@ class folderchooser():
 		self.window.setLayout(mainGrid)
 
 
-	def __init__(self):
+	def __init__(self, path, value):
 		self.app = QApplication(sys.argv)
-
-		self.initLayout()
+		self.initLayout(path)
 		self.window.show()
+		if value:
+			self.monitor()
 		sys.exit(self.app.exec_())
 
 
+
 	#Le lineedit qui contient le chemin du dossier que l'on a choisi
-	def currentPathLineEdit(self):
-		currentfolder = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+	def currentPathLineEdit(self,path):
+		currentfolder = path
 		currentPathLineEdit = QLineEdit(currentfolder)
 		currentPathLineEdit.setToolTip("Path of the directory")
 		currentPathLineEdit.setPlaceholderText("Path to the directory to monitor")

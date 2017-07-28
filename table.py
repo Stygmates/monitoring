@@ -85,31 +85,16 @@ class table():
 			
 			self.tableWidget.setCellWidget(i, 0, checkBox)
 			self.tableWidget.setItem(i, 1, filenameItem)
-			worker1 = threads.Worker(self.loadstats, filename, i)
-			worker1.signals.result.connect(self.updatestats)
-			self.threadpool.start(worker1)
 
-			worker = threads.Worker(self.loadmrc, filename, i)
-			worker.signals.result.connect(self.updatemrc)
-			self.threadpool.start(worker)
-			worker2 = threads.Worker(self.loadctf, filename, i)
-			worker2.signals.result.connect(self.updatectf)
-			self.threadpool.start(worker2)
-
+		mainWorker = threads.mainWorker(self.path,filteredList)
+		mainWorker.signals.mainctf.connect(self.updatectf)
+		mainWorker.signals.mainmrc.connect(self.updatemrc)
+		mainWorker.signals.mainstats.connect(self.updatestats)
+		self.threadpool.start(mainWorker)
 		self.tableWidget.sortItems(0)
 
 	def updatestats(self, result):
 		self.tableWidget.setItem(result[1], 4, result[0])
-
-	def loadstats(self,filename,index):
-		statslog = self.path + filename + "_sum-cor_gctf.log"
-		stats = parser.getStats(self,statslog)
-		if stats is None:
-			statsItem = QtWidgets.QTableWidgetItem("Defocus U:\nDefocus V:\n Phase shift: ")
-		else:
-			statsItem = QtWidgets.QTableWidgetItem("Defocus U: " + stats[0] + "\nDefocus V: " + stats[1] + "\nPhase shift: " + stats[3])
-		return [statsItem,index]
-			
 
 	def updatemrc(self,result):
 		if result is not None:
@@ -118,28 +103,6 @@ class table():
 	def updatectf(self,result):
 		if result is not None:
 			self.tableWidget.setItem(result[1], 2, result[0])
-		
-	def loadmrc(self, filename, index):
-		mrcItem = QtWidgets.QTableWidgetItem()
-		mrcpixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.mrc")
-		if mrcpixmap is not None:
-			mrcpixmap = mrcpixmap.scaled(300,300)
-			mrc = QtGui.QPixmap(mrcpixmap)
-			mrcItem.setData(Qt.Qt.DecorationRole, mrc)
-			return [mrcItem,index]
-		else:
-			return
-
-	def loadctf(self,filename, index):
-		ctfItem = QtWidgets.QTableWidgetItem()
-		ctfpixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.ctf")
-		if ctfpixmap is not None:
-			ctfpixmap = ctfpixmap.scaled(300,300)
-			ctf = QtGui.QPixmap(ctfpixmap)
-			ctfItem.setData(Qt.Qt.DecorationRole, ctf)
-			return [ctfItem,index]
-		else:
-			return
 
 	def filterLineEdit(self):
 		filterLineEdit = QtWidgets.QLineEdit()
