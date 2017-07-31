@@ -6,10 +6,13 @@ import parser
 import threads
 ITEM = 0
 RESULTINDEX = 1
+
 FILENAMEINDEX = 0
 CTFINDEX = 1
 MRCINDEX = 2
 STATSINDEX = 3
+
+WIDGETSIZE = 220
 class table():
 
 	def __init__(self, parent, path, extension):
@@ -57,17 +60,16 @@ class table():
 
 
 	def tableWidget(self):
-		colomnWidth = 300
 		tableWidget = QtWidgets.QTableWidget()
 		headerList = ["File name","Ctf","Corresponding mrc","Parameters"]
 		tableWidget.setColumnCount(len(headerList))
 		tableWidget.setRowCount(0)
 		tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-		tableWidget.setFixedHeight(900)
-		tableWidget.setFixedWidth(len(headerList)*colomnWidth + 31)
+		tableWidget.setFixedHeight(4 * WIDGETSIZE)
+		tableWidget.setFixedWidth(len(headerList) * WIDGETSIZE + 31)
 		tableWidget.setHorizontalHeaderLabels(headerList)
 		for i in range(0,len(headerList)):
-			tableWidget.setColumnWidth(i,colomnWidth)
+			tableWidget.setColumnWidth(i,WIDGETSIZE)
 		return tableWidget
 
 	def updateList(self):
@@ -81,18 +83,58 @@ class table():
 
 		for i in range(0,len(filteredList)):
 			self.tableWidget.insertRow(self.tableWidget.rowCount())
-			self.tableWidget.setRowHeight(i,300)
+			self.tableWidget.setRowHeight(i, WIDGETSIZE)
 			filename = filteredList[i]
 			filenameItem = QtWidgets.QTableWidgetItem(filename)
-			self.tableWidget.setItem(i,0,filenameItem)
-			#Image			
+			self.tableWidget.setItem(i, 0, filenameItem)
 
-		mainWorker = threads.mainWorker(self.path,filteredList)
-		mainWorker.signals.mainCtf.connect(self.updateCtf)
-		mainWorker.signals.mainMrc.connect(self.updateMrc)
-		mainWorker.signals.mainStats.connect(self.updateStats)
-		self.threadpool.start(mainWorker)
+			workerCtf = threads.mainWorker(self.loadCtf, CTFINDEX, self.path, filteredList[i], i)
+			workerCtf.signals.mainCtf.connect(self.updateCtf)
+			self.threadpool.start(workerCtf)
+
+			workerMrc = threads.mainWorker(self.loadMrc, MRCINDEX, self.path,filteredList[i], i)
+			workerMrc.signals.mainMrc.connect(self.updateMrc)
+			self.threadpool.start(workerMrc)
+
+			workerStats = threads.mainWorker(self.loadStats, STATSINDEX, self.path, filteredList[i], i)
+			workerStats.signals.mainStats.connect(self.updateStats)
+			self.threadpool.start(workerStats)
+
 		self.tableWidget.sortItems(0)
+
+	def loadMrc(self, filename, index):
+		mrcItem = QtWidgets.QTableWidgetItem()
+		mrcpixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.mrc")
+		if mrcpixmap is not None:
+			mrcpixmap = mrcpixmap.scaled(WIDGETSIZE,WIDGETSIZE)
+			mrc = QtGui.QPixmap(mrcpixmap)
+			mrcItem.setData(Qt.Qt.DecorationRole, mrc)
+			result = [mrcItem,index]
+			return result
+		else:
+			return
+
+	def loadCtf(self,filename, index):
+		ctfItem = QtWidgets.QTableWidgetItem()
+		ctfpixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.ctf")
+		if ctfpixmap is not None:
+			ctfpixmap = ctfpixmap.scaled(WIDGETSIZE,WIDGETSIZE)
+			ctf = QtGui.QPixmap(ctfpixmap)
+			ctfItem.setData(Qt.Qt.DecorationRole, ctf)
+			result = [ctfItem,index]
+			return result
+		else:
+			return
+
+	def loadStats(self,filename,index):
+		statslog = self.path + filename + "_sum-cor_gctf.log"
+		stats = parser.getStats(self,statslog)
+		if stats is None:
+			statsItem = QtWidgets.QTableWidgetItem("Defocus U:\nDefocus V:\n Phase shift: ")
+		else:
+			statsItem = QtWidgets.QTableWidgetItem("Defocus U: " + stats[0] + "\nDefocus V: " + stats[1] + "\nPhase shift: " + stats[3])
+		result = [statsItem,index]
+		return result
 
 	def updateFilename(self, result):
 		self.tableWidget.setItem(result[RESULTINDEX], FILENAMEINDEX, result[ITEM])
