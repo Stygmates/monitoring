@@ -4,8 +4,12 @@ import tablewatcher
 import iomrc
 import parser
 import threads
-INDEX = 0
-ITEM = 1
+ITEM = 0
+RESULTINDEX = 1
+FILENAMEINDEX = 0
+CTFINDEX = 1
+MRCINDEX = 2
+STATSINDEX = 3
 class table():
 
 	def __init__(self, parent, path, extension):
@@ -60,7 +64,7 @@ class table():
 		tableWidget.setRowCount(0)
 		tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
 		tableWidget.setFixedHeight(900)
-		tableWidget.setFixedWidth(len(headerList)*colomnWidth)
+		tableWidget.setFixedWidth(len(headerList)*colomnWidth + 31)
 		tableWidget.setHorizontalHeaderLabels(headerList)
 		for i in range(0,len(headerList)):
 			tableWidget.setColumnWidth(i,colomnWidth)
@@ -91,18 +95,18 @@ class table():
 		self.tableWidget.sortItems(0)
 
 	def updateFilename(self, result):
-		self.tableWidget.setItem(result[INDEX], 1, result[ITEM])
+		self.tableWidget.setItem(result[RESULTINDEX], FILENAMEINDEX, result[ITEM])
 
 	def updateStats(self, result):
-		self.tableWidget.setItem(result[1], 4, result[0])
+		self.tableWidget.setItem(result[RESULTINDEX], STATSINDEX, result[ITEM])
 
 	def updateMrc(self,result):
 		if result is not None:
-			self.tableWidget.setItem(result[1], 3, result[0])
+			self.tableWidget.setItem(result[RESULTINDEX], MRCINDEX, result[ITEM])
 
 	def updateCtf(self,result):
 		if result is not None:
-			self.tableWidget.setItem(result[1], 2, result[0])
+			self.tableWidget.setItem(result[RESULTINDEX], CTFINDEX, result[ITEM])
 
 	def filterLineEdit(self):
 		filterLineEdit = QtWidgets.QLineEdit()
