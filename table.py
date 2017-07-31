@@ -88,17 +88,11 @@ class table():
 			filenameItem = QtWidgets.QTableWidgetItem(filename)
 			self.tableWidget.setItem(i, 0, filenameItem)
 
-			workerCtf = threads.mainWorker(self.loadCtf, CTFINDEX, self.path, filteredList[i], i)
-			workerCtf.signals.mainCtf.connect(self.updateCtf)
-			self.threadpool.start(workerCtf)
-
-			workerMrc = threads.mainWorker(self.loadMrc, MRCINDEX, self.path,filteredList[i], i)
-			workerMrc.signals.mainMrc.connect(self.updateMrc)
-			self.threadpool.start(workerMrc)
-
-			workerStats = threads.mainWorker(self.loadStats, STATSINDEX, self.path, filteredList[i], i)
-			workerStats.signals.mainStats.connect(self.updateStats)
-			self.threadpool.start(workerStats)
+			worker = threads.mainWorker(self.path, filteredList[i], i)
+			worker.signals.mainCtf.connect(self.updateCtf)
+			worker.signals.mainMrc.connect(self.updateMrc)
+			worker.signals.mainStats.connect(self.updateStats)
+			self.threadpool.start(worker)
 
 		self.tableWidget.sortItems(0)
 
