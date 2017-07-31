@@ -3,10 +3,9 @@ import traceback, sys
 import iomrc,parser
 
 class mainWorkerSignals(QtCore.QObject):
-	mainctf = QtCore.pyqtSignal(object)
-	mainmrc = QtCore.pyqtSignal(object)
-	mainstats = QtCore.pyqtSignal(object)
-	wtf = QtCore.pyqtSignal()
+	mainCtf = QtCore.pyqtSignal(object)
+	mainMrc = QtCore.pyqtSignal(object)
+	mainStats = QtCore.pyqtSignal(object)
 
 class mainWorker(QtCore.QRunnable):
 	def __init__(self,path, filteredList):
@@ -16,7 +15,8 @@ class mainWorker(QtCore.QRunnable):
 		self.filteredList = filteredList
 		self.path = path
 
-	def loadmrc(self, filename, index):
+
+	def loadMrc(self, filename, index):
 		mrcItem = QtWidgets.QTableWidgetItem()
 		mrcpixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.mrc")
 		if mrcpixmap is not None:
@@ -27,7 +27,7 @@ class mainWorker(QtCore.QRunnable):
 		else:
 			return
 
-	def loadctf(self,filename, index):
+	def loadCtf(self,filename, index):
 		ctfItem = QtWidgets.QTableWidgetItem()
 		ctfpixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.ctf")
 		if ctfpixmap is not None:
@@ -38,7 +38,7 @@ class mainWorker(QtCore.QRunnable):
 		else:
 			return
 
-	def loadstats(self,filename,index):
+	def loadStats(self,filename,index):
 		statslog = self.path + filename + "_sum-cor_gctf.log"
 		stats = parser.getStats(self,statslog)
 		if stats is None:
@@ -47,14 +47,13 @@ class mainWorker(QtCore.QRunnable):
 			statsItem = QtWidgets.QTableWidgetItem("Defocus U: " + stats[0] + "\nDefocus V: " + stats[1] + "\nPhase shift: " + stats[3])
 		return [statsItem,index]
 
-	def printwtf(self,result):
-		print("WTF")
 
 	def run(self):
 		for i in range(0,len(self.filteredList)):
-			mrc = self.loadmrc(self.filteredList[i], i)
-			self.signals.mainmrc.emit(mrc)
-			ctf = self.loadctf(self.filteredList[i], i)
-			self.signals.mainctf.emit(ctf)
-			stats = self.loadstats(self.filteredList[i], i)
-			self.signals.mainstats.emit(stats)
+			mrc = self.loadMrc(self.filteredList[i], i)
+			self.signals.mainMrc.emit(mrc)
+			ctf = self.loadCtf(self.filteredList[i], i)
+			self.signals.mainCtf.emit(ctf)
+			stats = self.loadStats(self.filteredList[i], i)
+			self.signals.mainStats.emit(stats)
+

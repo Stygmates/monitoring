@@ -4,6 +4,8 @@ import tablewatcher
 import iomrc
 import parser
 import threads
+INDEX = 0
+ITEM = 1
 class table():
 
 	def __init__(self, parent, path, extension):
@@ -53,16 +55,15 @@ class table():
 	def tableWidget(self):
 		colomnWidth = 300
 		tableWidget = QtWidgets.QTableWidget()
-		headerList = ["","File name","Ctf","Corresponding mrc","Parameters"]
+		headerList = ["File name","Ctf","Corresponding mrc","Parameters"]
 		tableWidget.setColumnCount(len(headerList))
 		tableWidget.setRowCount(0)
 		tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
 		tableWidget.setFixedHeight(900)
-		tableWidget.setFixedWidth((len(headerList)-1)*colomnWidth+20)
+		tableWidget.setFixedWidth(len(headerList)*colomnWidth)
 		tableWidget.setHorizontalHeaderLabels(headerList)
-		for i in range(1,len(headerList)+1):
+		for i in range(0,len(headerList)):
 			tableWidget.setColumnWidth(i,colomnWidth)
-		tableWidget.setColumnWidth(0,20)
 		return tableWidget
 
 	def updateList(self):
@@ -79,28 +80,27 @@ class table():
 			self.tableWidget.setRowHeight(i,300)
 			filename = filteredList[i]
 			filenameItem = QtWidgets.QTableWidgetItem(filename)
-			#Image
-
-			checkBox = QtWidgets.QCheckBox()
-			
-			self.tableWidget.setCellWidget(i, 0, checkBox)
-			self.tableWidget.setItem(i, 1, filenameItem)
+			self.tableWidget.setItem(i,0,filenameItem)
+			#Image			
 
 		mainWorker = threads.mainWorker(self.path,filteredList)
-		mainWorker.signals.mainctf.connect(self.updatectf)
-		mainWorker.signals.mainmrc.connect(self.updatemrc)
-		mainWorker.signals.mainstats.connect(self.updatestats)
+		mainWorker.signals.mainCtf.connect(self.updateCtf)
+		mainWorker.signals.mainMrc.connect(self.updateMrc)
+		mainWorker.signals.mainStats.connect(self.updateStats)
 		self.threadpool.start(mainWorker)
 		self.tableWidget.sortItems(0)
 
-	def updatestats(self, result):
+	def updateFilename(self, result):
+		self.tableWidget.setItem(result[INDEX], 1, result[ITEM])
+
+	def updateStats(self, result):
 		self.tableWidget.setItem(result[1], 4, result[0])
 
-	def updatemrc(self,result):
+	def updateMrc(self,result):
 		if result is not None:
 			self.tableWidget.setItem(result[1], 3, result[0])
 
-	def updatectf(self,result):
+	def updateCtf(self,result):
 		if result is not None:
 			self.tableWidget.setItem(result[1], 2, result[0])
 
