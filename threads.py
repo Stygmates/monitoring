@@ -11,22 +11,22 @@ class mainWorkerSignals(QtCore.QObject):
 	mainStats = QtCore.pyqtSignal(object)
 
 class mainWorker(QtCore.QRunnable):
-	def __init__(self,function,functionType, path, filename, index):
+	def __init__(self, function, functionType, path, fileList):
 		super(mainWorker, self).__init__()
 		self.function = function
 		self.functionType = functionType
 		self.signals = mainWorkerSignals()
 		self.path = path
-		self.filename = filename
-		self.index = index
+		self.fileList = fileList
 
 	def run(self):
-		result = self.function(self.filename, self.index)
-		if self.functionType == CTFINDEX:
-			self.signals.mainCtf.emit(result)
-		elif self.functionType == MRCINDEX:
-			self.signals.mainMrc.emit(result)
-		elif self.functionType == STATSINDEX:
-			self.signals.mainStats.emit(result)
-		else:
-			print("Function type not defined")
+		for i in range(0,len(self.fileList)):
+			result = self.function(self.fileList[i], i)
+			if self.functionType == CTFINDEX:
+				self.signals.mainCtf.emit(result)
+			elif self.functionType == MRCINDEX:
+				self.signals.mainMrc.emit(result)
+			elif self.functionType == STATSINDEX:
+				self.signals.mainStats.emit(result)
+			else:
+				print("Function type not defined")
