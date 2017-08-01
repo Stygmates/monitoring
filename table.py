@@ -8,10 +8,11 @@ import threads
 ITEM = 0
 RESULTINDEX = 1
 
-FILENAMEINDEX = 0
-CTFINDEX = 1
-MRCINDEX = 2
-STATSINDEX = 3
+CHECKBOXINDEX = 0
+FILENAMEINDEX = 1
+CTFINDEX = 2
+MRCINDEX = 3
+STATSINDEX = 4
 
 WIDGETSIZE = 220
 
@@ -66,14 +67,15 @@ class table():
 
 	def tableWidget(self):
 		tableWidget = QtWidgets.QTableWidget()
-		headerList = ["File name","Ctf","Corresponding mrc","Parameters"]
+		headerList = ["","File name","Ctf","Corresponding mrc","Parameters"]
 		tableWidget.setColumnCount(len(headerList))
 		tableWidget.setRowCount(0)
 		tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
 		tableWidget.setFixedHeight(4 * WIDGETSIZE)
-		tableWidget.setFixedWidth(len(headerList) * WIDGETSIZE + 31)
+		tableWidget.setFixedWidth((len(headerList)-1) * WIDGETSIZE + 56)
 		tableWidget.setHorizontalHeaderLabels(headerList)
-		for i in range(0,len(headerList)):
+		tableWidget.setColumnWidth(0,25)
+		for i in range(1,len(headerList)):
 			tableWidget.setColumnWidth(i,WIDGETSIZE)
 		return tableWidget
 
@@ -91,7 +93,10 @@ class table():
 			self.tableWidget.insertRow(self.tableWidget.rowCount())
 			self.tableWidget.setRowHeight(i, WIDGETSIZE)
 			filenameItem = QtWidgets.QTableWidgetItem(filename)
-			self.tableWidget.setItem(i, 0, filenameItem)
+			self.tableWidget.setItem(i, FILENAMEINDEX, filenameItem)
+			checkBoxItem = QtWidgets.QTableWidgetItem()
+			checkBoxItem.setCheckState(Qt.Qt.Unchecked)
+			self.tableWidget.setItem(i,CHECKBOXINDEX,checkBoxItem)
 			self.filequeue.put([i,filename])
 
 		for thread in range(NB_WORKERS):
