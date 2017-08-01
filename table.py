@@ -13,6 +13,9 @@ MRCINDEX = 2
 STATSINDEX = 3
 
 WIDGETSIZE = 220
+
+NB_WORKERS = 10
+
 class table():
 
 	def __init__(self, parent, path, extension):
@@ -87,7 +90,7 @@ class table():
 			filenameItem = QtWidgets.QTableWidgetItem(filename)
 			self.tableWidget.setItem(i, 0, filenameItem)
 
-			worker = threads.mainWorker(self.path, filteredList[i], i)
+			worker = threads.mainWorker(self.path, filename, i)
 			worker.signals.mainCtf.connect(self.updateCtf)
 			worker.signals.mainMrc.connect(self.updateMrc)
 			worker.signals.mainStats.connect(self.updateStats)
