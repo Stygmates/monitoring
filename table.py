@@ -17,6 +17,7 @@ WIDGETSIZE = 220
 
 NB_WORKERS = 20
 
+
 class table():
 
 	def __init__(self, parent, path, extension):
@@ -103,6 +104,7 @@ class table():
 				worker.signals.startNext.connect(self.startNext)
 				self.threadpool.start(worker)
 
+
 		self.tableWidget.sortItems(0)
 
 	def startNext(self):
@@ -114,7 +116,6 @@ class table():
 			worker.signals.mainStats.connect(self.updateStats)
 			worker.signals.startNext.connect(self.startNext)
 			self.threadpool.start(worker)
-
 
 	def updateFilename(self, result):
 		self.tableWidget.setItem(result[RESULTINDEX], FILENAMEINDEX, result[ITEM])
@@ -154,6 +155,7 @@ class table():
 		return quitButton
 
 	def quitFunction(self):
+		self.finishThreads = True
 		self.parent.app.quit()
 
 
