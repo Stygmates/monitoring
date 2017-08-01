@@ -17,7 +17,6 @@ def getStats(self,filename):
 				parameters = tab[index + 1].split()
 				result = []
 				for i, parameter in enumerate(parameters):
-					print(parameter)
 					if parameter == "Defocus_U":
 						result.append(values[i])
 					if parameter == "Defocus_V":
