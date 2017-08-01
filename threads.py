@@ -7,6 +7,7 @@ class mainWorkerSignals(QtCore.QObject):
 	mainCtf = QtCore.pyqtSignal(object)
 	mainMrc = QtCore.pyqtSignal(object)
 	mainStats = QtCore.pyqtSignal(object)
+	startNext = QtCore.pyqtSignal()
 
 class mainWorker(QtCore.QRunnable):
 	def __init__(self, path, filename, index):
@@ -58,3 +59,4 @@ class mainWorker(QtCore.QRunnable):
 		self.signals.mainMrc.emit(mrc)
 		stats = self.loadStats(self.filename, self.index)
 		self.signals.mainStats.emit(stats)
+		self.signals.startNext.emit()

@@ -1,5 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
-import sys, os, inspect, re
+import sys, os, inspect, re, queue
+
 import tablewatcher
 import iomrc
 import parser
@@ -14,7 +15,7 @@ STATSINDEX = 3
 
 WIDGETSIZE = 220
 
-NB_WORKERS = 10
+NB_WORKERS = 20
 
 class table():
 
@@ -84,53 +85,36 @@ class table():
 		except Exception as e:
 			filteredList = fileList
 
+		self.filequeue = queue.Queue(0)
 		for i, filename in enumerate(filteredList):
 			self.tableWidget.insertRow(self.tableWidget.rowCount())
 			self.tableWidget.setRowHeight(i, WIDGETSIZE)
 			filenameItem = QtWidgets.QTableWidgetItem(filename)
 			self.tableWidget.setItem(i, 0, filenameItem)
+			self.filequeue.put([i,filename])
 
-			worker = threads.mainWorker(self.path, filename, i)
-			worker.signals.mainCtf.connect(self.updateCtf)
-			worker.signals.mainMrc.connect(self.updateMrc)
-			worker.signals.mainStats.connect(self.updateStats)
-			self.threadpool.start(worker)
+		for thread in range(NB_WORKERS):
+			if self.filequeue.empty() == False:
+				element = self.filequeue.get()
+				worker = threads.mainWorker(self.path, element[1], element[0])
+				worker.signals.mainCtf.connect(self.updateCtf)
+				worker.signals.mainMrc.connect(self.updateMrc)
+				worker.signals.mainStats.connect(self.updateStats)
+				worker.signals.startNext.connect(self.startNext)
+				self.threadpool.start(worker)
 
 		self.tableWidget.sortItems(0)
 
-	def loadMrc(self, filename, index):
-		mrcItem = QtWidgets.QTableWidgetItem()
-		mrcpixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.mrc")
-		if mrcpixmap is not None:
-			mrcpixmap = mrcpixmap.scaled(WIDGETSIZE,WIDGETSIZE)
-			mrc = QtGui.QPixmap(mrcpixmap)
-			mrcItem.setData(Qt.Qt.DecorationRole, mrc)
-			result = [mrcItem,index]
-			return result
-		else:
-			return
+	def startNext(self):
+		if self.filequeue.empty() == False:
+			element = self.filequeue.get()
+			worker = threads.mainWorker(self.path, element[1], element[0])
+			worker.signals.mainCtf.connect(self.updateCtf)
+			worker.signals.mainMrc.connect(self.updateMrc)
+			worker.signals.mainStats.connect(self.updateStats)
+			worker.signals.startNext.connect(self.startNext)
+			self.threadpool.start(worker)
 
-	def loadCtf(self,filename, index):
-		ctfItem = QtWidgets.QTableWidgetItem()
-		ctfpixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.ctf")
-		if ctfpixmap is not None:
-			ctfpixmap = ctfpixmap.scaled(WIDGETSIZE,WIDGETSIZE)
-			ctf = QtGui.QPixmap(ctfpixmap)
-			ctfItem.setData(Qt.Qt.DecorationRole, ctf)
-			result = [ctfItem,index]
-			return result
-		else:
-			return
-
-	def loadStats(self,filename,index):
-		statslog = self.path + filename + "_sum-cor_gctf.log"
-		stats = parser.getStats(self,statslog)
-		if stats is None:
-			statsItem = QtWidgets.QTableWidgetItem("Defocus U:\nDefocus V:\n Phase shift: ")
-		else:
-			statsItem = QtWidgets.QTableWidgetItem("Defocus U: " + stats[0] + "\nDefocus V: " + stats[1] + "\nPhase shift: " + stats[3])
-		result = [statsItem,index]
-		return result
 
 	def updateFilename(self, result):
 		self.tableWidget.setItem(result[RESULTINDEX], FILENAMEINDEX, result[ITEM])
