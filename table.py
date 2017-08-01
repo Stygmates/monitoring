@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
-import sys, os, inspect, re, queue
+import sys,shutil, os, inspect, re, queue, glob
 
 import tablewatcher
 import iomrc
@@ -29,13 +29,13 @@ class table():
 		self.widgetsSize = 100
 		self.path = path + "/"
 		self.extension = extension
-		self.centeredLayout = QtWidgets.QVBoxLayout()
+		self.centeredLayout = QtWidgets.QHBoxLayout()
 		self.centeredLayout.setAlignment(Qt.Qt.AlignCenter)
 		self.mainLayout = QtWidgets.QVBoxLayout()
 		self.mainLayout.setAlignment(Qt.Qt.AlignCenter)
-		self.filterLayout = QtWidgets.QHBoxLayout()
-		self.filterLayout.setAlignment(Qt.Qt.AlignLeft)
-		self.buttonsLayout = QtWidgets.QHBoxLayout()
+		self.filterLayout = QtWidgets.QVBoxLayout()
+		#self.filterLayout.setAlignment(Qt.Qt.AlignLeft)
+		self.buttonsLayout = QtWidgets.QVBoxLayout()
 		self.buttonsLayout.setAlignment(Qt.Qt.AlignRight)
 		#Widget config
 		self.filterLineEdit = self.filterLineEdit()
@@ -43,18 +43,20 @@ class table():
 
 
 
+		self.moveButton = self.moveButton()
 		self.quitButton = self.quitButton()
 		self.backButton = self.backButton()
 
+		self.buttonsLayout.addWidget(self.moveButton)
 		self.buttonsLayout.addWidget(self.quitButton)
 		self.buttonsLayout.addWidget(self.backButton)
 
 		self.filterLayout.addWidget(self.filterLineEdit)
 
-		self.centeredLayout.addLayout(self.filterLayout)
 		self.centeredLayout.addWidget(self.tableWidget)
 		self.centeredLayout.addLayout(self.buttonsLayout)
 
+		self.mainLayout.addLayout(self.filterLayout)
 		self.mainLayout.addLayout(self.centeredLayout)
 
 		self.watcher = tablewatcher.watcher(self)
@@ -143,11 +145,32 @@ class table():
 		filterLineEdit.textChanged.connect(self.updateList)
 		return filterLineEdit
 
+	def moveButton(self):
+		moveButton = QtWidgets.QPushButton("Move to trash")
+		moveButton.clicked.connect(self.moveFunction)
+		return moveButton
+
 	def backButton(self):
 		backButton = QtWidgets.QPushButton("Back")
 		backButton.clicked.connect(self.backFunction)
 		backButton.setFixedWidth(self.widgetsSize)
 		return backButton
+
+	def moveFunction(self):
+		trashPath = self.path + "Trash/"
+		try:
+			os.mkdir(trashPath)
+		except OSError:
+			pass
+		for i in range(self.tableWidget.rowCount()):
+			checkbox = self.tableWidget.item(i, CHECKBOXINDEX)
+			if checkbox.checkState() == Qt.Qt.Checked:
+				filename = self.tableWidget.item(i, FILENAMEINDEX).text()
+				for file in glob.glob(self.path + filename + "*"):
+					print("Moved to " + trashPath + os.path.basename(file))
+					shutil.move(file, trashPath + os.path.basename(file))
+
+
 
 	def backFunction(self):
 		self.window.close()
