@@ -16,7 +16,7 @@ STATSINDEX = 4
 
 WIDGETSIZE = 220
 
-NB_WORKERS = 20
+NB_WORKERS = 5
 
 
 class table():
@@ -167,7 +167,6 @@ class table():
 			if checkbox.checkState() == Qt.Qt.Checked:
 				filename = self.tableWidget.item(i, FILENAMEINDEX).text()
 				for file in glob.glob(self.path + filename + "*"):
-					print("Moved to " + trashPath + os.path.basename(file))
 					shutil.move(file, trashPath + os.path.basename(file))
 
 
