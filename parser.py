@@ -10,9 +10,21 @@ def getStats(self,filename):
 			line = file.readline()
 			tab.append(line)
 		tab.reverse()
-		for line in tab:
+		for index, line in enumerate(tab):
 			if "Final Values" in line:
 				file.close()
-				return line.split()
+				values = line.split()
+				parameters = tab[index + 1].split()
+				result = []
+				for i, parameter in enumerate(parameters):
+					print(parameter)
+					if parameter == "Defocus_U":
+						result.append(values[i])
+					if parameter == "Defocus_V":
+						result.append(values[i])
+					if parameter == "Phase_shift":
+						result.append(values[i])
+				return result
+
 		file.close()
 		return

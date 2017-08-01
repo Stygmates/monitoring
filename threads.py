@@ -45,10 +45,12 @@ class mainWorker(QtCore.QRunnable):
 	def loadStats(self,filename,index):
 		statslog = self.path + filename + "_sum-cor_gctf.log"
 		stats = parser.getStats(self,statslog)
-		if stats is None:
+		if stats is None or len(stats) == 0:
 			statsItem = QtWidgets.QTableWidgetItem("Defocus U:\nDefocus V:\n Phase shift: ")
+		elif len(stats) == 3:
+			statsItem = QtWidgets.QTableWidgetItem("Defocus U: " + stats[0] + "\nDefocus V: " + stats[1] + "\nPhase shift: " + stats[2])
 		else:
-			statsItem = QtWidgets.QTableWidgetItem("Defocus U: " + stats[0] + "\nDefocus V: " + stats[1] + "\nPhase shift: " + stats[3])
+			statsItem = QtWidgets.QTableWidgetItem("Defocus U: " + stats[0] + "\nDefocus V: " + stats[1] + "\nPhase shift: None")
 		result = [statsItem,index]
 		return result
 

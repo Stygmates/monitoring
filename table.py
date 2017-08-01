@@ -145,6 +145,12 @@ class table():
 		filterLineEdit.textChanged.connect(self.updateList)
 		return filterLineEdit
 
+	def checkSelectedButton(self):
+		checkSelectedButton = QtWidgets.QPushButton("Check selected rows")
+		selectedRows = self.tableWidget.selectionModel.selectedRows()
+		for index in selectedRows:
+			self.tableWidget.item(index, CHECKBOXINDEX).setCheckState(Qt.Qt.Checked)
+
 	def moveButton(self):
 		moveButton = QtWidgets.QPushButton("Move to trash")
 		moveButton.clicked.connect(self.moveFunction)
