@@ -81,10 +81,9 @@ class table():
 		except Exception as e:
 			filteredList = fileList
 
-		for i in range(0,len(filteredList)):
+		for i, filename in enumerate(filteredList):
 			self.tableWidget.insertRow(self.tableWidget.rowCount())
 			self.tableWidget.setRowHeight(i, WIDGETSIZE)
-			filename = filteredList[i]
 			filenameItem = QtWidgets.QTableWidgetItem(filename)
 			self.tableWidget.setItem(i, 0, filenameItem)
 
