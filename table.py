@@ -7,6 +7,7 @@ import parser
 import threads
 ITEM = 0
 RESULTINDEX = 1
+ORIGINALPIXMAP = 2
 
 CHECKBOXINDEX = 0
 FILENAMEINDEX = 1
@@ -25,6 +26,8 @@ class table():
 		self.parent = parent
 		self.window = QtWidgets.QWidget()
 		self.threadpool = QtCore.QThreadPool()
+		self.dictionnaireMrc = {}
+		self.dictionnaireCtf = {}
 
 		self.widgetsSize = 100
 		self.path = path + "/"
@@ -80,6 +83,7 @@ class table():
 		tableWidget.setFixedWidth((len(headerList)-1) * WIDGETSIZE + 56)
 		tableWidget.setHorizontalHeaderLabels(headerList)
 		tableWidget.setColumnWidth(0,25)
+		tableWidget.cellDoubleClicked.connect(self.displayImage)
 		for i in range(1,len(headerList)):
 			tableWidget.setColumnWidth(i,WIDGETSIZE)
 		return tableWidget
@@ -136,10 +140,28 @@ class table():
 	def updateMrc(self,result):
 		if result is not None:
 			self.tableWidget.setItem(result[RESULTINDEX], MRCINDEX, result[ITEM])
+			self.dictionnaireMrc[result[RESULTINDEX]] = result[ORIGINALPIXMAP]
 
 	def updateCtf(self,result):
 		if result is not None:
 			self.tableWidget.setItem(result[RESULTINDEX], CTFINDEX, result[ITEM])
+			self.dictionnaireCtf[result[RESULTINDEX]] = result[ORIGINALPIXMAP]
+
+	def displayImage(self, row, column):
+		if column == CTFINDEX or MRCINDEX:
+			dialog = QtWidgets.QDialog()
+			
+			image = QtWidgets.QLabel()
+			if column == CTFINDEX:
+				pixmap = self.dictionnaireCtf[row].scaled(1000,1000)
+			else:
+				pixmap = self.dictionnaireMrc[row].scaled(1000,1000)
+			image.setPixmap(pixmap)
+			layout = QtWidgets.QVBoxLayout()
+			layout.addWidget(image)
+			dialog.setLayout(layout)
+			dialog.show()
+			dialog.exec_()
 
 	def filterLineEdit(self):
 		filterLineEdit = QtWidgets.QLineEdit()

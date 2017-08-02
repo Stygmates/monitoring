@@ -20,24 +20,24 @@ class mainWorker(QtCore.QRunnable):
 
 	def loadMrc(self, filename, index):
 		mrcItem = QtWidgets.QTableWidgetItem()
-		mrcpixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.mrc")
-		if mrcpixmap is not None:
-			mrcpixmap = mrcpixmap.scaled(WIDGETSIZE,WIDGETSIZE)
+		mrcpixmapOriginal = iomrc.getpixmap(self.path + filename + "_sum-cor.mrc")
+		if mrcpixmapOriginal is not None:
+			mrcpixmap = mrcpixmapOriginal.scaled(WIDGETSIZE,WIDGETSIZE)
 			mrc = QtGui.QPixmap(mrcpixmap)
 			mrcItem.setData(Qt.Qt.DecorationRole, mrc)
-			result = [mrcItem,index]
+			result = [mrcItem, index, mrcpixmapOriginal]
 			return result
 		else:
 			return
 
 	def loadCtf(self,filename, index):
 		ctfItem = QtWidgets.QTableWidgetItem()
-		ctfpixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.ctf")
-		if ctfpixmap is not None:
-			ctfpixmap = ctfpixmap.scaled(WIDGETSIZE,WIDGETSIZE)
+		ctfpixmapOriginal = iomrc.getpixmap(self.path + filename + "_sum-cor.ctf")
+		if ctfpixmapOriginal is not None:
+			ctfpixmap = ctfpixmapOriginal.scaled(WIDGETSIZE,WIDGETSIZE)
 			ctf = QtGui.QPixmap(ctfpixmap)
 			ctfItem.setData(Qt.Qt.DecorationRole, ctf)
-			result = [ctfItem,index]
+			result = [ctfItem, index, ctfpixmapOriginal]
 			return result
 		else:
 			return
