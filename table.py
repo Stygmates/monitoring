@@ -36,17 +36,19 @@ class table():
 		self.filterLayout = QtWidgets.QVBoxLayout()
 		#self.filterLayout.setAlignment(Qt.Qt.AlignLeft)
 		self.buttonsLayout = QtWidgets.QVBoxLayout()
-		self.buttonsLayout.setAlignment(Qt.Qt.AlignRight)
+		self.buttonsLayout.setAlignment(Qt.Qt.AlignCenter)
 		#Widget config
 		self.filterLineEdit = self.filterLineEdit()
 		self.tableWidget = self.tableWidget()
 
-
-
+		self.uncheckSelectedButton = self.uncheckSelectedButton()
+		self.checkSelectedButton = self.checkSelectedButton()
 		self.moveButton = self.moveButton()
 		self.quitButton = self.quitButton()
 		self.backButton = self.backButton()
 
+		self.buttonsLayout.addWidget(self.uncheckSelectedButton)
+		self.buttonsLayout.addWidget(self.checkSelectedButton)
 		self.buttonsLayout.addWidget(self.moveButton)
 		self.buttonsLayout.addWidget(self.quitButton)
 		self.buttonsLayout.addWidget(self.backButton)
@@ -73,6 +75,7 @@ class table():
 		tableWidget.setColumnCount(len(headerList))
 		tableWidget.setRowCount(0)
 		tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+		tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
 		tableWidget.setFixedHeight(4 * WIDGETSIZE)
 		tableWidget.setFixedWidth((len(headerList)-1) * WIDGETSIZE + 56)
 		tableWidget.setHorizontalHeaderLabels(headerList)
@@ -147,9 +150,23 @@ class table():
 
 	def checkSelectedButton(self):
 		checkSelectedButton = QtWidgets.QPushButton("Check selected rows")
-		selectedRows = self.tableWidget.selectionModel.selectedRows()
+		checkSelectedButton.clicked.connect(self.checkSelectedFunction)
+		return checkSelectedButton
+	
+	def checkSelectedFunction(self):
+		selectedRows = self.tableWidget.selectionModel().selectedRows()
 		for index in selectedRows:
-			self.tableWidget.item(index, CHECKBOXINDEX).setCheckState(Qt.Qt.Checked)
+			self.tableWidget.item(index.row(), CHECKBOXINDEX).setCheckState(Qt.Qt.Checked)
+
+	def uncheckSelectedButton(self):
+		checkSelectedButton = QtWidgets.QPushButton("Uncheck selected rows")
+		checkSelectedButton.clicked.connect(self.uncheckSelectedFunction)
+		return checkSelectedButton
+	
+	def uncheckSelectedFunction(self):
+		selectedRows = self.tableWidget.selectionModel().selectedRows()
+		for index in selectedRows:
+			self.tableWidget.item(index.row(), CHECKBOXINDEX).setCheckState(Qt.Qt.Unchecked)
 
 	def moveButton(self):
 		moveButton = QtWidgets.QPushButton("Move to trash")
@@ -175,8 +192,6 @@ class table():
 				for file in glob.glob(self.path + filename + "*"):
 					shutil.move(file, trashPath + os.path.basename(file))
 
-
-
 	def backFunction(self):
 		self.window.close()
 		self.parent.window.show()
@@ -188,7 +203,6 @@ class table():
 		return quitButton
 
 	def quitFunction(self):
-		self.finishThreads = True
 		self.parent.app.quit()
 
 
