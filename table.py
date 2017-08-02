@@ -153,9 +153,15 @@ class table():
 			
 			image = QtWidgets.QLabel()
 			if column == CTFINDEX:
-				pixmap = self.dictionnaireCtf[row].scaled(1000,1000)
+				try:
+					pixmap = self.dictionnaireCtf[row].scaled(1000,1000)
+				except KeyError:
+					return
 			else:
-				pixmap = self.dictionnaireMrc[row].scaled(1000,1000)
+				try:
+					pixmap = self.dictionnaireMrc[row].scaled(1000,1000)
+				except KeyError:
+					return
 			image.setPixmap(pixmap)
 			layout = QtWidgets.QVBoxLayout()
 			layout.addWidget(image)
