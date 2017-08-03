@@ -41,6 +41,7 @@ class table():
 		self.buttonsLayout = QtWidgets.QGridLayout()
 		self.buttonsLayout.setAlignment(Qt.Qt.AlignCenter)
 		#Widget config
+		self.pathLabel = self.pathLabel()
 		self.filterLineEdit = self.filterLineEdit()
 		self.tableWidget = self.tableWidget()
 
@@ -58,6 +59,7 @@ class table():
 		self.buttonsLayout.addWidget(self.quitButton, 3, 0)
 		self.buttonsLayout.addWidget(self.backButton, 3, 1)
 
+		self.filterLayout.addWidget(self.pathLabel)
 		self.filterLayout.addWidget(self.filterLineEdit)
 
 		self.centeredLayout.addWidget(self.tableWidget)
@@ -201,6 +203,11 @@ class table():
 	'''
 	'''
 	'''
+
+	def pathLabel(self):
+		label = QtWidgets.QLabel(self.path)
+		return label
+
 	def filterLineEdit(self):
 		filterLineEdit = QtWidgets.QLineEdit()
 		filterLineEdit.setFixedWidth(400)
