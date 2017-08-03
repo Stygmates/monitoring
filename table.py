@@ -24,6 +24,7 @@ class table():
 
 	def __init__(self, parent, path, extension):
 		self.parent = parent
+		self.parent.app.aboutToQuit.connect(self.quitFunction)
 		self.window = QtWidgets.QWidget()
 		self.threadpool = QtCore.QThreadPool()
 		self.dictionnaireMrc = {}
