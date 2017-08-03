@@ -1,5 +1,4 @@
-import sys, os, inspect
-from PyQt5 import QtWidgets,QtCore
+from PyQt5 import QtCore
 
 
 #Permet de surveiller un dossier et de mettre a jour la listView contenant la liste des fichiers du dossier de la classe parent ayant appelee la classe watcher

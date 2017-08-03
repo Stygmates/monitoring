@@ -1,9 +1,8 @@
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
-import sys,shutil, os, inspect, re, queue, glob
+import shutil, os, re, queue
 
 import tablewatcher
 import iomrc
-import parser
 import threads
 ITEM = 0
 RESULTINDEX = 1

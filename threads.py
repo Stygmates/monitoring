@@ -1,5 +1,4 @@
 from PyQt5 import QtCore, QtWidgets, QtGui, Qt
-import traceback, sys
 import iomrc,parser
 
 WIDGETSIZE = 220
