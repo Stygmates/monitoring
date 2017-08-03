@@ -27,8 +27,6 @@ class table():
 		self.parent.app.aboutToQuit.connect(self.quitFunction)
 		self.window = QtWidgets.QWidget()
 		self.threadpool = QtCore.QThreadPool()
-		self.dictionnaireMrc = {}
-		self.dictionnaireCtf = {}
 
 		self.path = path + "/"
 		self.extension = extension
@@ -101,6 +99,8 @@ class table():
 	Function that updates the table with all of the data
 	'''
 	def updateList(self):
+		self.dictionnaireCtf = {}
+		self.dictionnaireMrc = {}
 		self.tableWidget.setRowCount(0)
 		fileList = [f[:-4] for f in os.listdir(self.path) if f.endswith(self.extension)]
 		try:
