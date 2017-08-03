@@ -231,6 +231,8 @@ class table():
 		return quitButton
 
 	def quitFunction(self):
+		self.threadpool.clear()
+		self.threadpool.waitForDone()
 		self.parent.app.quit()
 
 
