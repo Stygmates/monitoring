@@ -30,7 +30,7 @@ class mainWorker(QtCore.QRunnable):
 		else:
 			return
 
-	def loadCtf(self,filename, index):
+	def loadCtf(self, filename, index):
 		ctfItem = QtWidgets.QTableWidgetItem()
 		ctfpixmapOriginal = iomrc.getpixmap(self.path + filename + "_sum-cor.ctf")
 		if ctfpixmapOriginal is not None:
@@ -42,7 +42,7 @@ class mainWorker(QtCore.QRunnable):
 		else:
 			return
 
-	def loadStats(self,filename,index):
+	def loadStats(self, filename, index):
 		statslog = self.path + filename + "_sum-cor_gctf.log"
 		stats = parser.getStats(self,statslog)
 		if stats is None or len(stats) == 0:
