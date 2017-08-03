@@ -6,7 +6,6 @@ import iomrc
 import threads
 ITEM = 0
 RESULTINDEX = 1
-ORIGINALPIXMAP = 2
 
 CHECKBOXINDEX = 0
 FILENAMEINDEX = 1
@@ -98,8 +97,6 @@ class table():
 	Function that updates the table with all of the data
 	'''
 	def updateList(self):
-		self.dictionnaireCtf = {}
-		self.dictionnaireMrc = {}
 		self.tableWidget.setRowCount(0)
 		fileList = [f[:-4] for f in os.listdir(self.path) if f.endswith(self.extension)]
 		try:
@@ -113,6 +110,7 @@ class table():
 			self.tableWidget.insertRow(self.tableWidget.rowCount())
 			self.tableWidget.setRowHeight(i, WIDGETSIZE)
 			filenameItem = QtWidgets.QTableWidgetItem(filename)
+			filenameItem.setFlags(filenameItem.flags() &~ Qt.Qt.ItemIsEditable)
 			self.tableWidget.setItem(i, FILENAMEINDEX, filenameItem)
 			checkBoxItem = QtWidgets.QTableWidgetItem()
 			checkBoxItem.setCheckState(Qt.Qt.Unchecked)
@@ -161,7 +159,6 @@ class table():
 	def updateMrc(self,result):
 		if result is not None:
 			self.tableWidget.setItem(result[RESULTINDEX], MRCINDEX, result[ITEM])
-			self.dictionnaireMrc[result[RESULTINDEX]] = result[ORIGINALPIXMAP]
 
 	'''
 	Function that updates the ctf column on the table with the result given by one of the threads
@@ -169,16 +166,31 @@ class table():
 	def updateCtf(self,result):
 		if result is not None:
 			self.tableWidget.setItem(result[RESULTINDEX], CTFINDEX, result[ITEM])
-			self.dictionnaireCtf[result[RESULTINDEX]] = result[ORIGINALPIXMAP]
 
 	'''
 	Function that creates the popup image when double clicking on an image
 	'''
 	def displayImage(self, row, column):
-		if column == CTFINDEX or MRCINDEX:
-			dialog = QtWidgets.QDialog()
+		if column == CTFINDEX or column ==MRCINDEX:
 			
+			dialog = QtWidgets.QDialog()
 			image = QtWidgets.QLabel()
+
+			filename = self.tableWidget.item(row, FILENAMEINDEX).text()
+			if column == CTFINDEX:
+				pixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.ctf").scaled(1000,1000)
+				dialog.setWindowTitle(filename + "_sum-cor.ctf")
+			elif column == MRCINDEX:
+				pixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.mrc").scaled(1000,1000)
+				dialog.setWindowTitle(filename + "_sum-cor.mrc")
+			image.setPixmap(pixmap)
+			layout = QtWidgets.QVBoxLayout()
+			layout.addWidget(image)
+			dialog.setLayout(layout)
+			dialog.show()
+			dialog.exec_()
+
+			'''
 			if column == CTFINDEX:
 				try:
 					pixmap = self.dictionnaireCtf[row].scaled(1000,1000)
@@ -194,7 +206,7 @@ class table():
 			layout.addWidget(image)
 			dialog.setLayout(layout)
 			dialog.show()
-			dialog.exec_()
+			'''
 
 	'''
 	'''

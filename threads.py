@@ -24,7 +24,8 @@ class mainWorker(QtCore.QRunnable):
 			mrcpixmap = mrcpixmapOriginal.scaled(WIDGETSIZE,WIDGETSIZE)
 			mrc = QtGui.QPixmap(mrcpixmap)
 			mrcItem.setData(Qt.Qt.DecorationRole, mrc)
-			result = [mrcItem, index, mrcpixmapOriginal]
+			mrcItem.setFlags(mrcItem.flags() &~ Qt.Qt.ItemIsEditable)
+			result = [mrcItem, index]
 			return result
 		else:
 			return
@@ -36,7 +37,8 @@ class mainWorker(QtCore.QRunnable):
 			ctfpixmap = ctfpixmapOriginal.scaled(WIDGETSIZE,WIDGETSIZE)
 			ctf = QtGui.QPixmap(ctfpixmap)
 			ctfItem.setData(Qt.Qt.DecorationRole, ctf)
-			result = [ctfItem, index, ctfpixmapOriginal]
+			ctfItem.setFlags(ctfItem.flags() &~ Qt.Qt.ItemIsEditable)
+			result = [ctfItem, index]
 			return result
 		else:
 			return
@@ -50,6 +52,7 @@ class mainWorker(QtCore.QRunnable):
 			statsItem = QtWidgets.QTableWidgetItem("Defocus U: " + stats[0] + "\nDefocus V: " + stats[1] + "\nPhase shift: " + stats[2])
 		else:
 			statsItem = QtWidgets.QTableWidgetItem("Defocus U: " + stats[0] + "\nDefocus V: " + stats[1] + "\nPhase shift: None")
+			statsItem.setFlags(statsItem.flags() &~ Qt.Qt.ItemIsEditable)
 		result = [statsItem,index]
 		return result
 
