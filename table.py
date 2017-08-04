@@ -41,6 +41,7 @@ class table():
 		self.filterLineEdit = self.filterLineEdit()
 		self.tableWidget = self.tableWidget()
 
+		self.checkAllButton = self.checkAllButton()
 		self.clearSelectionButton = self.clearSelectionButton()
 		self.uncheckSelectedButton = self.uncheckSelectedButton()
 		self.checkSelectedButton = self.checkSelectedButton()
@@ -48,12 +49,13 @@ class table():
 		self.quitButton = self.quitButton()
 		self.backButton = self.backButton()
 
-		self.buttonsLayout.addWidget(self.clearSelectionButton, 0, 0, 1, 2)
-		self.buttonsLayout.addWidget(self.uncheckSelectedButton, 1, 0)
-		self.buttonsLayout.addWidget(self.checkSelectedButton, 1, 1)
-		self.buttonsLayout.addWidget(self.moveButton, 2, 0, 1, 2)
-		self.buttonsLayout.addWidget(self.quitButton, 3, 0)
-		self.buttonsLayout.addWidget(self.backButton, 3, 1)
+		self.buttonsLayout.addWidget(self.checkAllButton, 0, 0, 1, 2)
+		self.buttonsLayout.addWidget(self.clearSelectionButton, 1, 0, 1, 2)
+		self.buttonsLayout.addWidget(self.uncheckSelectedButton, 2, 0)
+		self.buttonsLayout.addWidget(self.checkSelectedButton, 2, 1)
+		self.buttonsLayout.addWidget(self.moveButton, 3, 0, 1, 2)
+		self.buttonsLayout.addWidget(self.quitButton, 4, 0)
+		self.buttonsLayout.addWidget(self.backButton, 4, 1)
 
 		self.filterLayout.addWidget(self.pathLabel)
 		self.filterLayout.addWidget(self.filterLineEdit)
@@ -226,6 +228,11 @@ class table():
 		filterLineEdit.textChanged.connect(self.updateList)
 		return filterLineEdit
 
+	def checkAllButton(self):
+		checkAllButton = QtWidgets.QCheckBox("Check/Uncheck all")
+		checkAllButton.stateChanged.connect(self.checkAllFunction)
+		return checkAllButton
+
 	def clearSelectionButton(self):
 		clearSelectionButton = QtWidgets.QPushButton("Clear selection")
 		clearSelectionButton.clicked.connect(self.clearSelectionFunction)
@@ -265,8 +272,18 @@ class table():
 	'''
 	'''
 
+	def checkAllFunction(self):
+		state = self.checkAllButton.checkState()
+		for index in range(self.tableWidget.rowCount()):
+			checkBoxItem = self.tableWidget.item(index, CHECKBOXINDEX)
+			if state == Qt.Qt.Checked:
+				checkBoxItem.setCheckState(Qt.Qt.Checked)
+			elif state == Qt.Qt.Unchecked:
+				checkBoxItem.setCheckState(Qt.Qt.Unchecked)
+
 	def clearSelectionFunction(self):
 		self.tableWidget.clearSelection()
+
 
 	def checkSelectedFunction(self):
 		selectedRows = self.tableWidget.selectionModel().selectedRows()
