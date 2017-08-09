@@ -71,7 +71,7 @@ class table():
 		self.window.setLayout(self.mainLayout)
 		self.window.show()
 
-		self.updateList()
+		self.loadList()
 
 
 
@@ -98,7 +98,7 @@ class table():
 	'''
 	Function that updates the table with all of the data
 	'''
-	def updateList(self):
+	def loadList(self):
 		self.tableWidget.setRowCount(0)
 		fileList = [f[:-4] for f in os.listdir(self.path) if f.endswith(self.extension)]
 		try:
@@ -225,7 +225,7 @@ class table():
 		filterLineEdit = QtWidgets.QLineEdit()
 		filterLineEdit.setFixedWidth(400)
 		filterLineEdit.setPlaceholderText("Filter")
-		filterLineEdit.textChanged.connect(self.updateList)
+		filterLineEdit.textChanged.connect(self.loadList)
 		return filterLineEdit
 
 	def checkAllButton(self):
