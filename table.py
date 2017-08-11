@@ -4,6 +4,7 @@ import shutil, os, re, queue, glob
 import tablewatcher
 import iomrc
 import threads
+import myinotify
 ITEM = 0
 RESULTINDEX = 1
 
@@ -22,12 +23,17 @@ class table():
 
 	def __init__(self, parent, path, extension):
 		self.parent = parent
-		self.parent.app.aboutToQuit.connect(self.quitFunction)
 		self.window = QtWidgets.QWidget()
 		self.threadpool = QtCore.QThreadPool()
-
+		self.stopLoading = False
 		self.path = path + "/"
 		self.extension = extension
+		self.watcher = myinotify.watcherWorker(self,self.path)
+		self.threadpool.start(self.watcher)
+
+		self.parent.app.aboutToQuit.connect(self.watcher.inotify.stopWatching)
+		self.parent.app.aboutToQuit.connect(self.quitFunction)
+
 		self.centeredLayout = QtWidgets.QHBoxLayout()
 		self.centeredLayout.setAlignment(Qt.Qt.AlignCenter)
 		self.mainLayout = QtWidgets.QVBoxLayout()
@@ -66,7 +72,6 @@ class table():
 		self.mainLayout.addLayout(self.filterLayout)
 		self.mainLayout.addLayout(self.centeredLayout)
 
-		self.watcher = tablewatcher.watcher(self)
 
 		self.window.setLayout(self.mainLayout)
 		self.window.show()
@@ -134,14 +139,15 @@ class table():
 	Function called that starts a new job once the last one is done, this is to keep the number of threads workers equal to NB_WORKERS
 	'''
 	def startNext(self):
-		if self.filequeue.empty() == False:
-			element = self.filequeue.get()
-			worker = threads.mainWorker(self.path, element[1], element[0])
-			worker.signals.mainCtf.connect(self.updateCtf)
-			worker.signals.mainMrc.connect(self.updateMrc)
-			worker.signals.mainStats.connect(self.updateStats)
-			worker.signals.startNext.connect(self.startNext)
-			self.threadpool.start(worker)
+		if self.stopLoading == False:
+			if self.filequeue.empty() == False:
+				element = self.filequeue.get()
+				worker = threads.mainWorker(self.path, element[1], element[0])
+				worker.signals.mainCtf.connect(self.updateCtf)
+				worker.signals.mainMrc.connect(self.updateMrc)
+				worker.signals.mainStats.connect(self.updateStats)
+				worker.signals.startNext.connect(self.startNext)
+				self.threadpool.start(worker)
 
 	'''
 	Function that updates the filename column on the table with the result given by one of the threads
@@ -255,12 +261,14 @@ class table():
 
 	def backButton(self):
 		backButton = QtWidgets.QPushButton("Back")
+		backButton.clicked.connect(self.watcher.inotify.stopWatching)
 		backButton.clicked.connect(self.backFunction)
 		#backButton.setFixedWidth(self.buttonsSize)
 		return backButton
 
 	def quitButton(self):
 		quitButton = QtWidgets.QPushButton("Quit")
+		quitButton.clicked.connect(self.watcher.inotify.stopWatching)
 		quitButton.clicked.connect(self.quitFunction)
 		#quitButton.setFixedWidth(self.buttonsSize)
 		return quitButton
@@ -309,10 +317,14 @@ class table():
 					shutil.move(file, trashPath + os.path.basename(file))
 	
 	def backFunction(self):
+		self.stopLoading = True
+		self.threadpool.clear()
+		self.threadpool.waitForDone()
 		self.window.close()
 		self.parent.window.show()
 
 	def quitFunction(self):
+		self.stopLoading = True
 		self.threadpool.clear()
 		self.threadpool.waitForDone()
 		self.parent.app.quit()

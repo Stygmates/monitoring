@@ -82,6 +82,7 @@ class folderchooser():
 		currentPathLineEdit = QLineEdit(currentfolder)
 		currentPathLineEdit.setToolTip("Path of the directory")
 		currentPathLineEdit.setPlaceholderText("Path to the directory to monitor")
+		currentPathLineEdit.returnPressed.connect(self.monitor)
 		return currentPathLineEdit
 
 
@@ -103,6 +104,7 @@ class folderchooser():
 		okButton = QPushButton("Ok")
 		okButton.setFixedWidth(buttonSize)
 		okButton.clicked.connect(self.monitor)
+		okButton.setAutoDefault(True)
 		#okButton.setEnabled(False)
 		return okButton
 
