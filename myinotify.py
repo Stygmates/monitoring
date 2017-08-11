@@ -3,8 +3,9 @@ from PyQt5.QtCore import QObject
 import os,sys
 from inotify_simple import INotify, flags
 
-class mainWorkerSignals(QtCore.QObject):
-	stopWatching = QtCore.pyqtSignal()
+class watcherWorkerSignals(QtCore.QObject):
+	loadFile = QtCore.pyqtSignal(object)
+	deleteFile = QtCore.pyqtSignal(object)
 
 class watcherWorker(QtCore.QRunnable):
 	def __init__(self,window, path):
@@ -18,8 +19,9 @@ class myInotify():
 	def __init__(self,parent, path):
 		self.keepWatching = True
 		self.inotify = INotify()
-		watch_flags = flags.CREATE | flags.DELETE | flags.MODIFY | flags.DELETE_SELF
+		watch_flags = flags.CREATE | flags.DELETE | flags.MODIFY
 		wd = self.inotify.add_watch(path, watch_flags)
+		self.signals = watcherWorkerSignals()
 
 
 	def stopWatching(self):
@@ -28,11 +30,18 @@ class myInotify():
 
 	def read(self):
 		while self.keepWatching == True:
-			print(self.keepWatching)
 			for event in self.inotify.read(timeout=500):
-				print(event)
+				print(event.name)
 				for flag in flags.from_mask(event.mask):
-					print('    ' + str(flag))
+					if flag == flags.DELETE:
+						print('Suppression')
+						self.signals.deleteFile.emit(event.name)
+					elif flag == flags.CREATE:
+						print('Creation')
+						self.signals.loadFile.emit(event.name)
+					elif flag == flags.MODIFY:
+						print('Modification')
+						self.signals.loadFile.emit(event.name)
 
 
 class window():

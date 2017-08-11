@@ -29,6 +29,8 @@ class table():
 		self.path = path + "/"
 		self.extension = extension
 		self.watcher = myinotify.watcherWorker(self,self.path)
+		self.watcher.inotify.signals.loadFile.connect(self.reloadFile)
+		self.watcher.inotify.signals.deleteFile.connect(self.deleteFile)
 		self.threadpool.start(self.watcher)
 
 		self.parent.app.aboutToQuit.connect(self.watcher.inotify.stopWatching)
@@ -78,7 +80,10 @@ class table():
 
 		self.loadList()
 
-
+	def reloadFile(self, filename):
+		print('Rechargement ' + filename)
+	def deleteFile(self, filename):
+		print('Suppression ' + filename)
 
 	'''
 	Main widget containing the list of all the data
