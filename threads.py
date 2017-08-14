@@ -1,6 +1,7 @@
 import parser
 
 import iomrc
+import table
 from PyQt5 import QtCore, QtWidgets, QtGui, Qt
 
 WIDGETSIZE = 220
@@ -23,7 +24,7 @@ class MainWorker(QtCore.QRunnable):
 
 	def load_mrc(self, filename, index):
 		mrc_item = QtWidgets.QTableWidgetItem()
-		mrc_pixmap_original = iomrc.get_pixmap(self.path + filename + "_sum-cor.mrc")
+		mrc_pixmap_original = iomrc.get_pixmap(self.path + filename + table.MRC_EXTENSION)
 		if mrc_pixmap_original is not None:
 			mrc_pixmap = mrc_pixmap_original.scaled(WIDGETSIZE, WIDGETSIZE)
 			mrc = QtGui.QPixmap(mrc_pixmap)
@@ -36,7 +37,7 @@ class MainWorker(QtCore.QRunnable):
 
 	def load_ctf(self, filename, index):
 		ctf_item = QtWidgets.QTableWidgetItem()
-		ctf_pixmap_original = iomrc.get_pixmap(self.path + filename + "_sum-cor.ctf")
+		ctf_pixmap_original = iomrc.get_pixmap(self.path + filename + table.CTF_EXTENSION)
 		if ctf_pixmap_original is not None:
 			ctf_pixmap = ctf_pixmap_original.scaled(WIDGETSIZE, WIDGETSIZE)
 			ctf = QtGui.QPixmap(ctf_pixmap)
@@ -48,7 +49,7 @@ class MainWorker(QtCore.QRunnable):
 			return
 
 	def load_stats(self, filename, index):
-		statslog = self.path + filename + "_sum-cor_gctf.log"
+		statslog = self.path + filename + table.STATS_EXTENSION
 		stats = parser.get_stats(self, statslog)
 		if stats is None or len(stats) == 0:
 			stats_item = QtWidgets.QTableWidgetItem("Defocus U:\nDefocus V:\n Phase shift: ")

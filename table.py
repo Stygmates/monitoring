@@ -12,6 +12,10 @@ from PyQt5 import QtCore, QtWidgets, Qt
 ITEM = 0
 RESULTINDEX = 1
 
+MRC_EXTENSION = '_sum-cor.mrc'
+CTF_EXTENSION = '_sum-cor.ctf'
+STATS_EXTENSION ='_sum-cor_gctf.log'
+
 CHECKBOXINDEX = 0
 FILENAMEINDEX = 1
 CTFINDEX = 2
@@ -30,9 +34,10 @@ class table():
 		self.window = QtWidgets.QWidget()
 		self.threadpool = QtCore.QThreadPool()
 		self.stop_loading = False
-		self.path = path + "/"
+		self.path = path
 		self.extension = extension
 		self.watcher = myinotify.watcherWorker(self,self.path)
+		self.watcher.inotify.signals.reload_file.connect(self.reload_file)
 		self.watcher.inotify.signals.load_file.connect(self.reload_file)
 		self.watcher.inotify.signals.delete_file.connect(self.delete_file)
 		self.threadpool.start(self.watcher)
@@ -82,6 +87,9 @@ class table():
 		self.window.show()
 
 		self.load_list()
+
+	def load_file(self, filename):
+		print('Rechargement ' + filename)
 
 	def reload_file(self, filename):
 		print('Rechargement ' + filename)
@@ -203,11 +211,11 @@ class table():
 
 			filename = self.table_widget.item(row, FILENAMEINDEX).text()
 			if column == CTFINDEX:
-				pixmap = iomrc.get_pixmap(self.path + filename + "_sum-cor.ctf").scaled(1000, 1000)
-				dialog.setWindowTitle(filename + "_sum-cor.ctf")
+				pixmap = iomrc.get_pixmap(self.path + filename + CTF_EXTENSION).scaled(1000, 1000)
+				dialog.setWindowTitle(filename + CTF_EXTENSION)
 			elif column == MRCINDEX:
-				pixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.mrc").scaled(1000,1000)
-				dialog.setWindowTitle(filename + "_sum-cor.mrc")
+				pixmap = iomrc.getpixmap(self.path + filename + MRC_EXTENSION).scaled(1000,1000)
+				dialog.setWindowTitle(filename + MRC_EXTENSION)
 			image.setPixmap(pixmap)
 			layout = QtWidgets.QVBoxLayout()
 			layout.addWidget(image)

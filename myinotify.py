@@ -1,7 +1,10 @@
+import table
 from PyQt5 import QtCore, QtWidgets
 from inotify_simple import INotify, flags, masks
 
+
 class watcherWorkerSignals(QtCore.QObject):
+	reload_file = QtCore.pyqtSignal(object)
 	load_file = QtCore.pyqtSignal(object)
 	delete_file = QtCore.pyqtSignal(object)
 
@@ -39,7 +42,15 @@ class myInotify():
 						self.signals.load_file.emit(event.name)
 					elif flag == flags.MODIFY:
 						print('Modification')
-						self.signals.load_file.emit(event.name)
+						if event.name.endswith(table.MRC_EXTENSION):
+							filename = event.name[:-(len(table.MRC_EXTENSION))]
+							self.signals.reload_file.emit(filename)
+						elif event.name.endswith(table.CTF_EXTENSION):
+							filename = event.name[:-(len(table.CTF_EXTENSION))]
+							self.signals.reload_file.emit(filename)
+						elif event.name.endswith(table.STATS_EXTENSION):
+							filename = event.name[:-(len(table.STATS_EXTENSION))]
+							self.signals.reload_file.emit(filename)
 
 
 class window():
