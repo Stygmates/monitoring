@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtWidgets
-from inotify_simple import INotify, flags
+from inotify_simple import INotify, flags, masks
 
 class watcherWorkerSignals(QtCore.QObject):
 	load_file = QtCore.pyqtSignal(object)
@@ -8,16 +8,16 @@ class watcherWorkerSignals(QtCore.QObject):
 class watcherWorker(QtCore.QRunnable):
 	def __init__(self,window, path):
 		super(watcherWorker, self).__init__()
-		self.inotify = myInotify(window,path)
+		self.inotify = myInotify(path)
 
 	def run(self):
 		self.inotify.read()
 
 class myInotify():
-	def __init__(self,parent, path):
+	def __init__(self, path):
 		self.keep_watching = True
 		self.inotify = INotify()
-		watch_flags = flags.CREATE | flags.DELETE | flags.MODIFY
+		watch_flags = flags.CREATE | flags.DELETE | flags.MODIFY| masks.MOVE
 		wd = self.inotify.add_watch(path, watch_flags)
 		self.signals = watcherWorkerSignals()
 
@@ -26,19 +26,20 @@ class myInotify():
 
 
 	def read(self):
-		while self.keep_watching == True:
+		while self.keep_watching:
 			for event in self.inotify.read(timeout=500):
-				print(event.name)
+				print("Watching")
+				print(event)
 				for flag in flags.from_mask(event.mask):
-					if flag == flags.DELETE:
+					if flag == flags.DELETE or flag == flags.MOVED_FROM:
 						print('Suppression')
-						self.signals.deleteFile.emit(event.name)
-					elif flag == flags.CREATE:
+						self.signals.delete_file.emit(event.name)
+					elif flag == flags.CREATE or flag == flags.MOVED_TO:
 						print('Creation')
-						self.signals.loadFile.emit(event.name)
+						self.signals.load_file.emit(event.name)
 					elif flag == flags.MODIFY:
 						print('Modification')
-						self.signals.loadFile.emit(event.name)
+						self.signals.load_file.emit(event.name)
 
 
 class window():
