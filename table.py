@@ -22,6 +22,10 @@ CTFINDEX = 2
 MRCINDEX = 3
 STATSINDEX = 4
 
+LOADINDEX = 0
+RELOADINDEX = 1
+DELETEINDEX = 2
+
 WIDGETSIZE = 220
 
 NB_WORKERS = 5
@@ -36,6 +40,7 @@ class table():
 		self.stop_loading = False
 		self.path = path
 		self.extension = extension
+		self.update_queue = queue.Queue(0)
 		self.watcher = myinotify.watcherWorker(self,self.path)
 		self.watcher.inotify.signals.reload_file.connect(self.reload_file)
 		self.watcher.inotify.signals.load_file.connect(self.reload_file)
@@ -89,7 +94,16 @@ class table():
 		self.load_list()
 
 	def load_file(self, filename):
-		print('Rechargement ' + filename)
+		if filename.endswith(MRC_EXTENSION):
+			filename = filename[:-(len(MRC_EXTENSION))]
+			result = [filename, MRCINDEX, LOADINDEX]
+		elif filename.endswith(CTF_EXTENSION):
+			filename = filename[:-(len(CTF_EXTENSION))]
+			result = [filename, CTFINDEX, LOADINDEX]
+		elif filename.endswith(STATS_EXTENSION):
+			filename = filename[:-(len(STATS_EXTENSION))]
+			result = [filename, STATSINDEX, LOADINDEX]
+		self.update_queue.put(result)
 
 	def reload_file(self, filename):
 		print('Rechargement ' + filename)

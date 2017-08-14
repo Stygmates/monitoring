@@ -1,4 +1,3 @@
-import table
 from PyQt5 import QtCore, QtWidgets
 from inotify_simple import INotify, flags, masks
 
@@ -42,15 +41,7 @@ class myInotify():
 						self.signals.load_file.emit(event.name)
 					elif flag == flags.MODIFY:
 						print('Modification')
-						if event.name.endswith(table.MRC_EXTENSION):
-							filename = event.name[:-(len(table.MRC_EXTENSION))]
-							self.signals.reload_file.emit(filename)
-						elif event.name.endswith(table.CTF_EXTENSION):
-							filename = event.name[:-(len(table.CTF_EXTENSION))]
-							self.signals.reload_file.emit(filename)
-						elif event.name.endswith(table.STATS_EXTENSION):
-							filename = event.name[:-(len(table.STATS_EXTENSION))]
-							self.signals.reload_file.emit(filename)
+						self.signals.reload_file.emit(event.name)
 
 
 class window():
