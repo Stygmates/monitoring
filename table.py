@@ -136,7 +136,7 @@ class table():
 			self.filequeue.put([i,filename])
 
 		for thread in range(NB_WORKERS):
-			if self.filequeue.empty() == False:
+			if not self.filequeue.empty():
 				element = self.filequeue.get()
 				worker = threads.MainWorker(self.path, element[1], element[0])
 				worker.signals.main_ctf.connect(self.update_ctf)
@@ -151,8 +151,8 @@ class table():
 	'''
 
 	def start_next(self):
-		if self.stop_loading == False:
-			if self.filequeue.empty() == False:
+		if not self.stop_loading:
+			if not self.filequeue.empty():
 				element = self.filequeue.get()
 				worker = threads.MainWorker(self.path, element[1], element[0])
 				worker.signals.main_ctf.connect(self.update_ctf)
