@@ -1,66 +1,72 @@
+import parser
+
+import iomrc
 from PyQt5 import QtCore, QtWidgets, QtGui, Qt
-import iomrc,parser
 
 WIDGETSIZE = 220
-class mainWorkerSignals(QtCore.QObject):
-	mainCtf = QtCore.pyqtSignal(object)
-	mainMrc = QtCore.pyqtSignal(object)
-	mainStats = QtCore.pyqtSignal(object)
-	startNext = QtCore.pyqtSignal()
 
-class mainWorker(QtCore.QRunnable):
+
+class MainWorkerSignals(QtCore.QObject):
+	main_ctf = QtCore.pyqtSignal(object)
+	main_mrc = QtCore.pyqtSignal(object)
+	main_stats = QtCore.pyqtSignal(object)
+	start_next = QtCore.pyqtSignal()
+
+
+class MainWorker(QtCore.QRunnable):
 	def __init__(self, path, filename, index):
-		super(mainWorker, self).__init__()
-		self.signals = mainWorkerSignals()
+		super(MainWorker, self).__init__()
+		self.signals = MainWorkerSignals()
 		self.path = path
 		self.filename = filename
 		self.index = index
 
-
-	def loadMrc(self, filename, index):
-		mrcItem = QtWidgets.QTableWidgetItem()
-		mrcpixmapOriginal = iomrc.getpixmap(self.path + filename + "_sum-cor.mrc")
-		if mrcpixmapOriginal is not None:
-			mrcpixmap = mrcpixmapOriginal.scaled(WIDGETSIZE,WIDGETSIZE)
-			mrc = QtGui.QPixmap(mrcpixmap)
-			mrcItem.setData(Qt.Qt.DecorationRole, mrc)
-			mrcItem.setFlags(mrcItem.flags() &~ Qt.Qt.ItemIsEditable)
-			result = [mrcItem, index]
+	def load_mrc(self, filename, index):
+		mrc_item = QtWidgets.QTableWidgetItem()
+		mrc_pixmap_original = iomrc.get_pixmap(self.path + filename + "_sum-cor.mrc")
+		if mrc_pixmap_original is not None:
+			mrc_pixmap = mrc_pixmap_original.scaled(WIDGETSIZE, WIDGETSIZE)
+			mrc = QtGui.QPixmap(mrc_pixmap)
+			mrc_item.setData(Qt.Qt.DecorationRole, mrc)
+			mrc_item.setFlags(mrc_item.flags() & ~ Qt.Qt.ItemIsEditable)
+			result = [mrc_item, index]
 			return result
 		else:
 			return
 
-	def loadCtf(self, filename, index):
-		ctfItem = QtWidgets.QTableWidgetItem()
-		ctfpixmapOriginal = iomrc.getpixmap(self.path + filename + "_sum-cor.ctf")
-		if ctfpixmapOriginal is not None:
-			ctfpixmap = ctfpixmapOriginal.scaled(WIDGETSIZE,WIDGETSIZE)
-			ctf = QtGui.QPixmap(ctfpixmap)
-			ctfItem.setData(Qt.Qt.DecorationRole, ctf)
-			ctfItem.setFlags(ctfItem.flags() &~ Qt.Qt.ItemIsEditable)
-			result = [ctfItem, index]
+	def load_ctf(self, filename, index):
+		ctf_item = QtWidgets.QTableWidgetItem()
+		ctf_pixmap_original = iomrc.get_pixmap(self.path + filename + "_sum-cor.ctf")
+		if ctf_pixmap_original is not None:
+			ctf_pixmap = ctf_pixmap_original.scaled(WIDGETSIZE, WIDGETSIZE)
+			ctf = QtGui.QPixmap(ctf_pixmap)
+			ctf_item.setData(Qt.Qt.DecorationRole, ctf)
+			ctf_item.setFlags(ctf_item.flags() & ~ Qt.Qt.ItemIsEditable)
+			result = [ctf_item, index]
 			return result
 		else:
 			return
 
-	def loadStats(self, filename, index):
+	def load_stats(self, filename, index):
 		statslog = self.path + filename + "_sum-cor_gctf.log"
-		stats = parser.getStats(self,statslog)
+		stats = parser.get_stats(self, statslog)
 		if stats is None or len(stats) == 0:
-			statsItem = QtWidgets.QTableWidgetItem("Defocus U:\nDefocus V:\n Phase shift: ")
+			stats_item = QtWidgets.QTableWidgetItem("Defocus U:\nDefocus V:\n Phase shift: ")
 		elif len(stats) == 3:
-			statsItem = QtWidgets.QTableWidgetItem("Defocus U: " + stats[0] + "\nDefocus V: " + stats[1] + "\nPhase shift: " + stats[2])
+			stats_item = QtWidgets.QTableWidgetItem(
+				"Defocus U: " + stats[0] + "\nDefocus V: " + stats[1] + "\nPhase shift: " + stats[2])
 		else:
-			statsItem = QtWidgets.QTableWidgetItem("Defocus U: " + stats[0] + "\nDefocus V: " + stats[1] + "\nPhase shift: None")
-			statsItem.setFlags(statsItem.flags() &~ Qt.Qt.ItemIsEditable)
-		result = [statsItem,index]
+			stats_item = QtWidgets.QTableWidgetItem(
+				"Defocus U: " + stats[0] + "\nDefocus V: " + stats[1] + "\nPhase shift: None")
+			stats_item.setFlags(stats_item.flags() & ~ Qt.Qt.ItemIsEditable)
+		result = [stats_item, index]
 		return result
 
 	def run(self):
-		ctf = self.loadCtf(self.filename, self.index)
-		self.signals.mainCtf.emit(ctf)
-		mrc = self.loadMrc(self.filename, self.index)
-		self.signals.mainMrc.emit(mrc)
-		stats = self.loadStats(self.filename, self.index)
-		self.signals.mainStats.emit(stats)
-		self.signals.startNext.emit()
+		ctf = self.load_ctf(self.filename, self.index)
+		self.signals.main_ctf.emit(ctf)
+		mrc = self.load_mrc(self.filename, self.index)
+		self.signals.main_mrc.emit(mrc)
+		stats = self.load_stats(self.filename, self.index)
+		self.signals.main_stats.emit(stats)
+		self.signals.start_next.emit()

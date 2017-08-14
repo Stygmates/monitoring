@@ -1,31 +1,34 @@
-import sys,os
+import os
+
 from PyQt5 import QtWidgets, QtCore
-class finalCountDown():
-	def __init__(self,parent):
+
+
+class FinalCountDown:
+	def __init__(self, parent):
 		self.parent = parent
 		self.extension = self.parent.extension
-		self.path = self.parent.currentPathLineEdit.text()
+		self.path = self.parent.current_path_lineedit.text()
 
 		self.window = QtWidgets.QWidget()
 		self.clock = self.clock()
-		self.timeInputLayout = self.timeInputLayout()
-		self.timer()
-		self.mainLayout = QtWidgets.QVBoxLayout()
-		self.mainLayout.addWidget(self.clock)
-		self.mainLayout.addLayout(self.timeInputLayout)
-		self.initListView()
+		self.time_input_layout = self.time_input_layout()
+		self.timer = self.timer()
+		self.main_layout = QtWidgets.QVBoxLayout()
+		self.main_layout.addWidget(self.clock)
+		self.main_layout.addLayout(self.time_input_layout)
+		self.init_listview()
 		layout = QtWidgets.QHBoxLayout()
-		self.quitButton = self.quitButton()
-		self.backButton = self.backButton()
-		self.cancelButton = self.cancelButton()
-		self.launchButton = self.launchButton()
-		layout.addWidget(self.quitButton)
-		layout.addWidget(self.backButton)
-		layout.addWidget(self.cancelButton)
-		layout.addWidget(self.launchButton)
-		self.mainLayout.addLayout(layout)
+		self.quit_button = self.quit_button()
+		self.back_button = self.back_button()
+		self.cancel_button = self.cancel_button()
+		self.launch_button = self.launch_button()
+		layout.addWidget(self.quit_button)
+		layout.addWidget(self.back_button)
+		layout.addWidget(self.cancel_button)
+		layout.addWidget(self.launch_button)
+		self.main_layout.addLayout(layout)
 
-		self.window.setLayout(self.mainLayout)
+		self.window.setLayout(self.main_layout)
 		self.window.show()
 
 
@@ -38,18 +41,19 @@ class finalCountDown():
 
 	#Initialisation du timer
 	def timer(self):
-		self.timer = QtCore.QTimer()
-		self.timer.setInterval(1000)
-		self.timer.timeout.connect(self.affichage)
+		timer = QtCore.QTimer()
+		timer.setInterval(1000)
+		timer.timeout.connect(self.affichage)
+		return timer
 
 	#Lancement du timer
-	def startTimer(self):
+	def start_timer(self):
 		self.timer.start()
 
 	#Layout contenant les spinbox permettant d'initialiser les heures et minutes du timer
-	def timeInputLayout(self):
-		labelHours = QtWidgets.QLabel(" hours")
-		labelminutes = QtWidgets.QLabel(" minutes")
+	def time_input_layout(self):
+		label_hours = QtWidgets.QLabel(" hours")
+		label_minutes = QtWidgets.QLabel(" minutes")
 		self.hours = QtWidgets.QSpinBox()
 		self.minutes = QtWidgets.QSpinBox()
 		self.minutes.setMaximum(59)
@@ -57,96 +61,96 @@ class finalCountDown():
 		layout = QtWidgets.QHBoxLayout()
 		
 		layout.addWidget(self.hours)
-		layout.addWidget(labelHours)
+		layout.addWidget(label_hours)
 		layout.addWidget(self.minutes)
-		layout.addWidget(labelminutes)
+		layout.addWidget(label_minutes)
 		return layout
 
-	def launchButton(self):
-		okButton = QtWidgets.QPushButton("Launch timer before processing")
-		okButton.clicked.connect(self.initTimer)
+	def launch_button(self):
+		ok_button = QtWidgets.QPushButton("Launch timer before processing")
+		ok_button.clicked.connect(self.init_timer)
 		self.clock.setStyleSheet("background-color: black;color:green;")
-		return okButton
+		return ok_button
 
-	def cancelButton(self):
-		cancelButton = QtWidgets.QPushButton("Cancel")
-		cancelButton.setEnabled(False)
-		cancelButton.clicked.connect(self.cancelTimer)
-		return cancelButton
+	def cancel_button(self):
+		cancel_button = QtWidgets.QPushButton("Cancel")
+		cancel_button.setEnabled(False)
+		cancel_button.clicked.connect(self.cancel_timer)
+		return cancel_button
 
-	def backButton(self):
-		backButton = QtWidgets.QPushButton("Back")
-		backButton.clicked.connect(self.backFunction)
-		return backButton
+	def back_button(self):
+		back_button = QtWidgets.QPushButton("Back")
+		back_button.clicked.connect(self.back_function)
+		return back_button
 
-	def quitButton(self):
-		quitButton = QtWidgets.QPushButton("Quit")
-		quitButton.clicked.connect(self.quitFunction)
-		return quitButton
+	def quit_button(self):
+		quit_button = QtWidgets.QPushButton("Quit")
+		quit_button.clicked.connect(self.quit_function)
+		return quit_button
 
-	def backFunction(self):
+	def back_function(self):
 		self.window.close()
 		self.timer.stop()
 		self.parent.window.show()
 
-	def quitFunction(self):
+	def quit_function(self):
 		self.parent.app.quit()
 
 	#Initialise le timer et lance le process fait avant le lancement du timer
-	def initTimer(self):
+	def init_timer(self):
 
-		self.preProcess()
+		self.pre_process()
 
-		self.hoursLeft = self.hours.value()
-		self.minutesLeft = self.minutes.value()
+		self.hours_left = self.hours.value()
+		self.minutes_left = self.minutes.value()
 		self.clock.setStyleSheet("background-color: black;color:red;")
-		self.launchButton.setEnabled(False)
-		self.cancelButton.setEnabled(True)
-		self.startTimer()
+		self.launch_button.setEnabled(False)
+		self.cancel_button.setEnabled(True)
+		self.start_timer()
 
-	def cancelTimer(self):
+	def cancel_timer(self):
 		self.timer.stop()
 		self.clock.setStyleSheet("background-color: black;color: green;")
-		self.launchButton.setEnabled(True)
-		self.cancelButton.setEnabled(False)
+		self.launch_button.setEnabled(True)
+		self.cancel_button.setEnabled(False)
 		self.clock.display("00:00")
 
 
 	def affichage(self):
-		if self.minutesLeft == 0:
-			if self.hoursLeft > 0:
-				self.minutesLeft = 59
-				self.hoursLeft = self.hoursLeft - 1
+		if self.minutes_left == 0:
+			if self.hours_left > 0:
+				self.minutes_left = 59
+				self.hours_left = self.hours_left - 1
 			else:
-				self.postProcess()
+				self.post_process()
 				self.timer.stop()
 				self.clock.setStyleSheet("background-color: black;color: green;")
-				self.launchButton.setEnabled(True)
-				self.cancelButton.setEnabled(False)
+				self.launch_button.setEnabled(True)
+				self.cancel_button.setEnabled(False)
 				self.clock.display("00:00")
 		else:
-			self.minutesLeft = self.minutesLeft - 1
-		time = str(self.hoursLeft) + ":" + str(self.minutesLeft)
+			self.minutes_left = self.minutes_left - 1
+		time = str(self.hours_left) + ":" + str(self.minutes_left)
 		self.clock.display(time)
 
 	#La liste des fichiers dans le dossier
-	def initListView(self):
-		self.listView = QtWidgets.QListView()
+	def init_listview(self):
+		self.listiew = QtWidgets.QListView()
 
-		self.fileList = [f for f in os.listdir(self.path) if f.endswith(self.extension)]
+		self.file_list = [f for f in os.listdir(self.path) if f.endswith(self.extension)]
 
-		model = QtCore.QStringListModel(self.fileList)
+		model = QtCore.QStringListModel(self.file_list)
 		self.listView.setModel(model)
 		self.listView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 
-		self.nbFiles = len(self.fileList)
-		self.nbFilesLabel = QtWidgets.QLabel("Files with the \"" + self.extension + "\" extension: "+ str(self.nbFiles))
-		
-		self.mainLayout.addWidget(self.nbFilesLabel)
-		self.mainLayout.addWidget(self.listView)
+		self.nb_files = len(self.file_list)
+		self.nb_files_label = QtWidgets.QLabel("Files with the \"" + self.extension + "\" extension: "+ str(self.nb_files))
 
-	def preProcess(self):
+		self.main_layout.addWidget(self.nb_files_label)
+		self.main_layout.addWidget(self.list_view)
+
+	def pre_process(self):
 		print("Lancement du pre-process")
 
-	def postProcess(self):
+	def post_process(self):
 		print("Lancement du post-process")

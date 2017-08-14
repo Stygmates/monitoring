@@ -1,11 +1,12 @@
-from scipy.misc import toimage
 import mrcfile
-from PyQt5 import QtCore, QtGui, QtWidgets
 from PIL.ImageQt import ImageQt
-import sys
+from PyQt5 import QtGui
+from scipy.misc import toimage
+
+
 #pip install --user mrcfile
 
-def getpixmap(filename):
+def get_pixmap(filename):
 	try:
 		mrc = mrcfile.open(filename, permissive=True)
 		if(filename.endswith(".ctf")):

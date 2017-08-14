@@ -1,10 +1,14 @@
-from PyQt5 import QtCore, QtGui, QtWidgets, Qt
-import shutil, os, re, queue, glob
+import glob
+import os
+import queue
+import re
+import shutil
 
-import tablewatcher
 import iomrc
-import threads
 import myinotify
+import threads
+from PyQt5 import QtCore, QtWidgets, Qt
+
 ITEM = 0
 RESULTINDEX = 1
 
@@ -25,173 +29,181 @@ class table():
 		self.parent = parent
 		self.window = QtWidgets.QWidget()
 		self.threadpool = QtCore.QThreadPool()
-		self.stopLoading = False
+		self.stop_loading = False
 		self.path = path + "/"
 		self.extension = extension
 		self.watcher = myinotify.watcherWorker(self,self.path)
-		self.watcher.inotify.signals.loadFile.connect(self.reloadFile)
-		self.watcher.inotify.signals.deleteFile.connect(self.deleteFile)
+		self.watcher.inotify.signals.load_file.connect(self.reload_file)
+		self.watcher.inotify.signals.delete_file.connect(self.delete_file)
 		self.threadpool.start(self.watcher)
 
-		self.parent.app.aboutToQuit.connect(self.watcher.inotify.stopWatching)
-		self.parent.app.aboutToQuit.connect(self.quitFunction)
+		self.parent.app.aboutToQuit.connect(self.watcher.inotify.stop_watching)
+		self.parent.app.aboutToQuit.connect(self.quit_function)
 
-		self.centeredLayout = QtWidgets.QHBoxLayout()
-		self.centeredLayout.setAlignment(Qt.Qt.AlignCenter)
-		self.mainLayout = QtWidgets.QVBoxLayout()
-		self.mainLayout.setAlignment(Qt.Qt.AlignCenter)
-		self.filterLayout = QtWidgets.QVBoxLayout()
+		self.centered_layout = QtWidgets.QHBoxLayout()
+		self.centered_layout.setAlignment(Qt.Qt.AlignCenter)
+		self.main_layout = QtWidgets.QVBoxLayout()
+		self.main_layout.setAlignment(Qt.Qt.AlignCenter)
+		self.filter_layout = QtWidgets.QVBoxLayout()
 		#self.filterLayout.setAlignment(Qt.Qt.AlignLeft)
-		self.buttonsLayout = QtWidgets.QGridLayout()
-		self.buttonsLayout.setAlignment(Qt.Qt.AlignCenter)
+		self.buttons_layout = QtWidgets.QGridLayout()
+		self.buttons_layout.setAlignment(Qt.Qt.AlignCenter)
 		#Widget config
-		self.pathLabel = self.pathLabel()
-		self.filterLineEdit = self.filterLineEdit()
-		self.tableWidget = self.tableWidget()
+		self.path_label = self.path_label()
+		self.filter_lineedit = self.filter_lineedit()
+		self.table_widget = self.table_widget()
 
-		self.checkAllButton = self.checkAllButton()
-		self.clearSelectionButton = self.clearSelectionButton()
-		self.uncheckSelectedButton = self.uncheckSelectedButton()
-		self.checkSelectedButton = self.checkSelectedButton()
-		self.moveButton = self.moveButton()
-		self.quitButton = self.quitButton()
-		self.backButton = self.backButton()
+		self.check_all_button = self.check_all_button()
+		self.clear_selection_button = self.clear_selection_button()
+		self.uncheck_selected_button = self.uncheck_selected_button()
+		self.check_selected_button = self.check_selected_button()
+		self.move_button = self.move_button()
+		self.quit_button = self.quit_button()
+		self.back_button = self.back_button()
 
-		self.buttonsLayout.addWidget(self.checkAllButton, 0, 0, 1, 2)
-		self.buttonsLayout.addWidget(self.clearSelectionButton, 1, 0, 1, 2)
-		self.buttonsLayout.addWidget(self.uncheckSelectedButton, 2, 0)
-		self.buttonsLayout.addWidget(self.checkSelectedButton, 2, 1)
-		self.buttonsLayout.addWidget(self.moveButton, 3, 0, 1, 2)
-		self.buttonsLayout.addWidget(self.quitButton, 4, 0)
-		self.buttonsLayout.addWidget(self.backButton, 4, 1)
+		self.buttons_layout.addWidget(self.check_all_button, 0, 0, 1, 2)
+		self.buttons_layout.addWidget(self.clear_selection_button, 1, 0, 1, 2)
+		self.buttons_layout.addWidget(self.uncheck_selected_button, 2, 0)
+		self.buttons_layout.addWidget(self.check_selected_button, 2, 1)
+		self.buttons_layout.addWidget(self.move_button, 3, 0, 1, 2)
+		self.buttons_layout.addWidget(self.quit_button, 4, 0)
+		self.buttons_layout.addWidget(self.back_button, 4, 1)
 
-		self.filterLayout.addWidget(self.pathLabel)
-		self.filterLayout.addWidget(self.filterLineEdit)
+		self.filter_layout.addWidget(self.path_label)
+		self.filter_layout.addWidget(self.filter_lineedit)
 
-		self.centeredLayout.addWidget(self.tableWidget)
-		self.centeredLayout.addLayout(self.buttonsLayout)
+		self.centered_layout.addWidget(self.table_widget)
+		self.centered_layout.addLayout(self.buttons_layout)
 
-		self.mainLayout.addLayout(self.filterLayout)
-		self.mainLayout.addLayout(self.centeredLayout)
+		self.main_layout.addLayout(self.filter_layout)
+		self.main_layout.addLayout(self.centered_layout)
 
-
-		self.window.setLayout(self.mainLayout)
+		self.window.setLayout(self.main_layout)
 		self.window.show()
 
-		self.loadList()
+		self.load_list()
 
-	def reloadFile(self, filename):
+	def reload_file(self, filename):
 		print('Rechargement ' + filename)
-	def deleteFile(self, filename):
+
+	def delete_file(self, filename):
 		print('Suppression ' + filename)
 
 	'''
 	Main widget containing the list of all the data
 	'''
-	def tableWidget(self):
-		tableWidget = QtWidgets.QTableWidget()
-		headerList = ["","File name","Ctf","Corresponding mrc","Parameters"]
-		tableWidget.setColumnCount(len(headerList))
-		tableWidget.setRowCount(0)
-		tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-		tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
-		tableWidget.setFixedHeight(4 * WIDGETSIZE)
-		tableWidget.setFixedWidth((len(headerList)-1) * WIDGETSIZE + 56)
-		tableWidget.setHorizontalHeaderLabels(headerList)
-		tableWidget.setColumnWidth(0,25)
-		tableWidget.cellDoubleClicked.connect(self.displayImage)
-		for i in range(1,len(headerList)):
-			tableWidget.setColumnWidth(i,WIDGETSIZE)
-		return tableWidget
+
+	def table_widget(self):
+		table_widget = QtWidgets.QTableWidget()
+		header_list = ["", "File name", "Ctf", "Corresponding mrc", "Parameters"]
+		table_widget.setColumnCount(len(header_list))
+		table_widget.setRowCount(0)
+		table_widget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+		table_widget.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
+		table_widget.setFixedHeight(4 * WIDGETSIZE)
+		table_widget.setFixedWidth((len(header_list) - 1) * WIDGETSIZE + 56)
+		table_widget.setHorizontalHeaderLabels(header_list)
+		table_widget.setColumnWidth(0, 25)
+		table_widget.cellDoubleClicked.connect(self.display_image)
+		for i in range(1, len(header_list)):
+			table_widget.setColumnWidth(i, WIDGETSIZE)
+		return table_widget
 
 
 	'''
 	Function that updates the table with all of the data
 	'''
-	def loadList(self):
-		self.tableWidget.setRowCount(0)
-		fileList = [f[:-4] for f in os.listdir(self.path) if f.endswith(self.extension)]
+
+	def load_list(self):
+		self.table_widget.setRowCount(0)
+		file_list = [f[:-4] for f in os.listdir(self.path) if f.endswith(self.extension)]
 		try:
-			regex = re.compile(self.filterLineEdit.text())
-			filteredList = list(filter(regex.search, fileList))
+			regex = re.compile(self.filter_lineedit.text())
+			filtered_list = list(filter(regex.search, file_list))
 		except Exception as e:
-			filteredList = fileList
+			filtered_list = file_list
 
 		self.filequeue = queue.Queue(0)
-		for i, filename in enumerate(filteredList):
-			self.tableWidget.insertRow(self.tableWidget.rowCount())
-			self.tableWidget.setRowHeight(i, WIDGETSIZE)
-			filenameItem = QtWidgets.QTableWidgetItem(filename)
-			filenameItem.setFlags(filenameItem.flags() &~ Qt.Qt.ItemIsEditable)
-			self.tableWidget.setItem(i, FILENAMEINDEX, filenameItem)
-			checkBoxItem = QtWidgets.QTableWidgetItem()
-			checkBoxItem.setCheckState(Qt.Qt.Unchecked)
-			self.tableWidget.setItem(i,CHECKBOXINDEX,checkBoxItem)
+		for i, filename in enumerate(filtered_list):
+			self.table_widget.insertRow(self.table_widget.rowCount())
+			self.table_widget.setRowHeight(i, WIDGETSIZE)
+			filename_item = QtWidgets.QTableWidgetItem(filename)
+			filename_item.setFlags(filename_item.flags() & ~ Qt.Qt.ItemIsEditable)
+			self.table_widget.setItem(i, FILENAMEINDEX, filename_item)
+			checkbox_item = QtWidgets.QTableWidgetItem()
+			checkbox_item.setCheckState(Qt.Qt.Unchecked)
+			self.table_widget.setItem(i, CHECKBOXINDEX, checkbox_item)
 			self.filequeue.put([i,filename])
 
 		for thread in range(NB_WORKERS):
 			if self.filequeue.empty() == False:
 				element = self.filequeue.get()
-				worker = threads.mainWorker(self.path, element[1], element[0])
-				worker.signals.mainCtf.connect(self.updateCtf)
-				worker.signals.mainMrc.connect(self.updateMrc)
-				worker.signals.mainStats.connect(self.updateStats)
-				worker.signals.startNext.connect(self.startNext)
+				worker = threads.MainWorker(self.path, element[1], element[0])
+				worker.signals.main_ctf.connect(self.update_ctf)
+				worker.signals.main_mrc.connect(self.update_mrc)
+				worker.signals.main_stats.connect(self.update_stats)
+				worker.signals.start_next.connect(self.start_next)
 				self.threadpool.start(worker)
-		self.tableWidget.sortItems(0)
+		self.table_widget.sortItems(0)
 
 	'''
 	Function called that starts a new job once the last one is done, this is to keep the number of threads workers equal to NB_WORKERS
 	'''
-	def startNext(self):
-		if self.stopLoading == False:
+
+	def start_next(self):
+		if self.stop_loading == False:
 			if self.filequeue.empty() == False:
 				element = self.filequeue.get()
-				worker = threads.mainWorker(self.path, element[1], element[0])
-				worker.signals.mainCtf.connect(self.updateCtf)
-				worker.signals.mainMrc.connect(self.updateMrc)
-				worker.signals.mainStats.connect(self.updateStats)
-				worker.signals.startNext.connect(self.startNext)
+				worker = threads.MainWorker(self.path, element[1], element[0])
+				worker.signals.main_ctf.connect(self.update_ctf)
+				worker.signals.main_mrc.connect(self.update_mrc)
+				worker.signals.main_stats.connect(self.update_stats)
+				worker.signals.start_next.connect(self.start_next)
 				self.threadpool.start(worker)
 
 	'''
 	Function that updates the filename column on the table with the result given by one of the threads
 	'''
-	def updateFilename(self, result):
-		self.tableWidget.setItem(result[RESULTINDEX], FILENAMEINDEX, result[ITEM])
+
+	def update_filename(self, result):
+		self.table_widget.setItem(result[RESULTINDEX], FILENAMEINDEX, result[ITEM])
 
 	'''
 	Function that updates the stats column on the table with the result given by one of the threads
 	'''
-	def updateStats(self, result):
-		self.tableWidget.setItem(result[RESULTINDEX], STATSINDEX, result[ITEM])
+
+	def update_stats(self, result):
+		self.table_widget.setItem(result[RESULTINDEX], STATSINDEX, result[ITEM])
 
 	'''
 	Function that updates the mrc column on the table with the result given by one of the threads
 	'''
-	def updateMrc(self,result):
+
+	def update_mrc(self, result):
 		if result is not None:
-			self.tableWidget.setItem(result[RESULTINDEX], MRCINDEX, result[ITEM])
+			self.table_widget.setItem(result[RESULTINDEX], MRCINDEX, result[ITEM])
 
 	'''
 	Function that updates the ctf column on the table with the result given by one of the threads
 	'''
-	def updateCtf(self,result):
+
+	def update_ctf(self, result):
 		if result is not None:
-			self.tableWidget.setItem(result[RESULTINDEX], CTFINDEX, result[ITEM])
+			self.table_widget.setItem(result[RESULTINDEX], CTFINDEX, result[ITEM])
 
 	'''
 	Function that creates the popup image when double clicking on an image
 	'''
-	def displayImage(self, row, column):
+
+	def display_image(self, row, column):
 		if column == CTFINDEX or column ==MRCINDEX:
 			
 			dialog = QtWidgets.QDialog()
 			image = QtWidgets.QLabel()
 
-			filename = self.tableWidget.item(row, FILENAMEINDEX).text()
+			filename = self.table_widget.item(row, FILENAMEINDEX).text()
 			if column == CTFINDEX:
-				pixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.ctf").scaled(1000,1000)
+				pixmap = iomrc.get_pixmap(self.path + filename + "_sum-cor.ctf").scaled(1000, 1000)
 				dialog.setWindowTitle(filename + "_sum-cor.ctf")
 			elif column == MRCINDEX:
 				pixmap = iomrc.getpixmap(self.path + filename + "_sum-cor.mrc").scaled(1000,1000)
@@ -228,55 +240,55 @@ class table():
 	'''
 	'''
 
-	def pathLabel(self):
+	def path_label(self):
 		label = QtWidgets.QLabel(self.path)
 		return label
 
-	def filterLineEdit(self):
-		filterLineEdit = QtWidgets.QLineEdit()
-		filterLineEdit.setFixedWidth(400)
-		filterLineEdit.setPlaceholderText("Filter")
-		filterLineEdit.textChanged.connect(self.loadList)
-		return filterLineEdit
+	def filter_lineedit(self):
+		filter_lineedit = QtWidgets.QLineEdit()
+		filter_lineedit.setFixedWidth(400)
+		filter_lineedit.setPlaceholderText("Filter")
+		filter_lineedit.textChanged.connect(self.load_list)
+		return filter_lineedit
 
-	def checkAllButton(self):
-		checkAllButton = QtWidgets.QCheckBox("Check/Uncheck all")
-		checkAllButton.stateChanged.connect(self.checkAllFunction)
-		return checkAllButton
+	def check_all_button(self):
+		check_all_button = QtWidgets.QCheckBox("Check/Uncheck all")
+		check_all_button.stateChanged.connect(self.check_all_function)
+		return check_all_button
 
-	def clearSelectionButton(self):
-		clearSelectionButton = QtWidgets.QPushButton("Clear selection")
-		clearSelectionButton.clicked.connect(self.clearSelectionFunction)
-		return clearSelectionButton
+	def clear_selection_button(self):
+		clear_selection_button = QtWidgets.QPushButton("Clear selection")
+		clear_selection_button.clicked.connect(self.clear_selection_function)
+		return clear_selection_button
 
-	def checkSelectedButton(self):
-		checkSelectedButton = QtWidgets.QPushButton("Check selected rows")
-		checkSelectedButton.clicked.connect(self.checkSelectedFunction)
-		return checkSelectedButton
-	
-	def uncheckSelectedButton(self):
-		checkSelectedButton = QtWidgets.QPushButton("Uncheck selected rows")
-		checkSelectedButton.clicked.connect(self.uncheckSelectedFunction)
-		return checkSelectedButton
+	def check_selected_button(self):
+		check_selected_button = QtWidgets.QPushButton("Check selected rows")
+		check_selected_button.clicked.connect(self.check_selected_function)
+		return check_selected_button
 
-	def moveButton(self):
-		moveButton = QtWidgets.QPushButton("Move to trash")
-		moveButton.clicked.connect(self.moveFunction)
-		return moveButton
+	def uncheck_selected_button(self):
+		check_selected_button = QtWidgets.QPushButton("Uncheck selected rows")
+		check_selected_button.clicked.connect(self.uncheck_selected_function)
+		return check_selected_button
 
-	def backButton(self):
-		backButton = QtWidgets.QPushButton("Back")
-		backButton.clicked.connect(self.watcher.inotify.stopWatching)
-		backButton.clicked.connect(self.backFunction)
+	def move_button(self):
+		move_button = QtWidgets.QPushButton("Move to trash")
+		move_button.clicked.connect(self.move_function)
+		return move_button
+
+	def back_button(self):
+		back_button = QtWidgets.QPushButton("Back")
+		back_button.clicked.connect(self.watcher.inotify.stop_watching)
+		back_button.clicked.connect(self.back_function)
 		#backButton.setFixedWidth(self.buttonsSize)
-		return backButton
+		return back_button
 
-	def quitButton(self):
-		quitButton = QtWidgets.QPushButton("Quit")
-		quitButton.clicked.connect(self.watcher.inotify.stopWatching)
-		quitButton.clicked.connect(self.quitFunction)
+	def quit_button(self):
+		quit_button = QtWidgets.QPushButton("Quit")
+		quit_button.clicked.connect(self.watcher.inotify.stop_watching)
+		quit_button.clicked.connect(self.quit_function)
 		#quitButton.setFixedWidth(self.buttonsSize)
-		return quitButton
+		return quit_button
 
 	'''
 	'''
@@ -285,51 +297,50 @@ class table():
 	'''
 	'''
 
-	def checkAllFunction(self):
-		state = self.checkAllButton.checkState()
-		for index in range(self.tableWidget.rowCount()):
-			checkBoxItem = self.tableWidget.item(index, CHECKBOXINDEX)
+	def check_all_function(self):
+		state = self.check_all_button.checkState()
+		for index in range(self.table_widget.rowCount()):
+			checkbox_item = self.table_widget.item(index, CHECKBOXINDEX)
 			if state == Qt.Qt.Checked:
-				checkBoxItem.setCheckState(Qt.Qt.Checked)
+				checkbox_item.setCheckState(Qt.Qt.Checked)
 			elif state == Qt.Qt.Unchecked:
-				checkBoxItem.setCheckState(Qt.Qt.Unchecked)
+				checkbox_item.setCheckState(Qt.Qt.Unchecked)
 
-	def clearSelectionFunction(self):
-		self.tableWidget.clearSelection()
+	def clear_selection_function(self):
+		self.table_widget.clearSelection()
 
+	def check_selected_function(self):
+		selected_rows = self.table_widget.selectionModel().selectedRows()
+		for index in selected_rows:
+			self.table_widget.item(index.row(), CHECKBOXINDEX).setCheckState(Qt.Qt.Checked)
 
-	def checkSelectedFunction(self):
-		selectedRows = self.tableWidget.selectionModel().selectedRows()
-		for index in selectedRows:
-			self.tableWidget.item(index.row(), CHECKBOXINDEX).setCheckState(Qt.Qt.Checked)
+	def uncheck_selected_function(self):
+		selected_rows = self.table_widget.selectionModel().selectedRows()
+		for index in selected_rows:
+			self.table_widget.item(index.row(), CHECKBOXINDEX).setCheckState(Qt.Qt.Unchecked)
 
-	def uncheckSelectedFunction(self):
-		selectedRows = self.tableWidget.selectionModel().selectedRows()
-		for index in selectedRows:
-			self.tableWidget.item(index.row(), CHECKBOXINDEX).setCheckState(Qt.Qt.Unchecked)
-
-	def moveFunction(self):
-		trashPath = self.path + "Trash/"
+	def move_function(self):
+		trash_path = self.path + "Trash/"
 		try:
-			os.mkdir(trashPath)
+			os.mkdir(trash_path)
 		except OSError:
 			pass
-		for i in range(self.tableWidget.rowCount()):
-			checkbox = self.tableWidget.item(i, CHECKBOXINDEX)
+		for i in range(self.table_widget.rowCount()):
+			checkbox = self.table_widget.item(i, CHECKBOXINDEX)
 			if checkbox.checkState() == Qt.Qt.Checked:
-				filename = self.tableWidget.item(i, FILENAMEINDEX).text()
+				filename = self.table_widget.item(i, FILENAMEINDEX).text()
 				for file in glob.glob(self.path + filename + "*"):
-					shutil.move(file, trashPath + os.path.basename(file))
-	
-	def backFunction(self):
-		self.stopLoading = True
+					shutil.move(file, trash_path + os.path.basename(file))
+
+	def back_function(self):
+		self.stop_loading = True
 		self.threadpool.clear()
 		self.threadpool.waitForDone()
 		self.window.close()
 		self.parent.window.show()
 
-	def quitFunction(self):
-		self.stopLoading = True
+	def quit_function(self):
+		self.stop_loading = True
 		self.threadpool.clear()
 		self.threadpool.waitForDone()
 		self.parent.app.quit()

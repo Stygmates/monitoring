@@ -1,29 +1,30 @@
-import monitoring,finalCountDown
+import inspect
+import os
+import sys
 
-import sys,os,inspect
+import table
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-import table
 
 buttonSize = 200
 
 #Classe de l'interface qui s'occupe de choisir le dossier qui sera surveille
 class folderchooser():
 
-	def initLayout(self,path):
+	def init_layout(self, path):
 		self.window = QWidget()
 		self.window.setWindowTitle("Select a directory")
-		mainGrid = QVBoxLayout()
+		main_grid = QVBoxLayout()
 
-		self.invalidPathLabel = self.invalidPathLabel()
-		mainGrid.addWidget(self.invalidPathLabel)
+		self.invalid_path_label = self.invalid_path_label()
+		main_grid.addWidget(self.invalid_path_label)
 
 		grid = QHBoxLayout()
-		self.currentPathLineEdit = self.currentPathLineEdit(path)
-		self.selectDirectoryButton = self.selectDirectoryButton()
-		grid.addWidget(self.currentPathLineEdit)
-		grid.addWidget(self.selectDirectoryButton)
+		self.current_path_lineedit = self.current_path_lineedit(path)
+		self.select_directory_button = self.select_directory_button()
+		grid.addWidget(self.current_path_lineedit)
+		grid.addWidget(self.select_directory_button)
 
 		#Deuxieme ligne avec les radiobuttons
 
@@ -54,21 +55,21 @@ class folderchooser():
 
 		#Troisieme ligne avec les boutons ok et quitter
 		grid3 = QHBoxLayout()
-		self.quitButton = self.quitButton()
-		self.okButton = self.okButton()
-		grid3.addWidget(self.quitButton)
-		grid3.addWidget(self.okButton)
+		self.quit_button = self.quit_button()
+		self.ok_button = self.ok_button()
+		grid3.addWidget(self.quit_button)
+		grid3.addWidget(self.ok_button)
 
-		mainGrid.addLayout(grid)
+		main_grid.addLayout(grid)
 		# mainGrid.addWidget(self.groupBox)
 		# mainGrid.addLayout(extensionLayout)
-		mainGrid.addLayout(grid3)
-		self.window.setLayout(mainGrid)
+		main_grid.addLayout(grid3)
+		self.window.setLayout(main_grid)
 
 
 	def __init__(self, path, value):
 		self.app = QApplication(sys.argv)
-		self.initLayout(path)
+		self.init_layout(path)
 		self.window.show()
 		if value:
 			self.monitor()
@@ -77,67 +78,67 @@ class folderchooser():
 
 
 	#Le lineedit qui contient le chemin du dossier que l'on a choisi
-	def currentPathLineEdit(self,path):
+	def current_path_lineedit(self,path):
 		currentfolder = path
-		currentPathLineEdit = QLineEdit(currentfolder)
-		currentPathLineEdit.setToolTip("Path of the directory")
-		currentPathLineEdit.setPlaceholderText("Path to the directory to monitor")
-		currentPathLineEdit.returnPressed.connect(self.monitor)
-		return currentPathLineEdit
+		current_path_lineedit = QLineEdit(currentfolder)
+		current_path_lineedit.setToolTip("Path of the directory")
+		current_path_lineedit.setPlaceholderText("Path to the directory to monitor")
+		current_path_lineedit.returnPressed.connect(self.monitor)
+		return current_path_lineedit
 
 
 	#Bouton permettant d'ouvrir une popup afin de selectionner le dossier dans l'arborescence
-	def selectDirectoryButton(self):
-		selectDirectoryButton = QPushButton("Select a directory")
-		selectDirectoryButton.setFixedWidth(buttonSize)
-		selectDirectoryButton.clicked.connect(self.folderChooser)
-		return selectDirectoryButton
+	def select_directory_button(self):
+		select_directory_button = QPushButton("Select a directory")
+		select_directory_button.setFixedWidth(buttonSize)
+		select_directory_button.clicked.connect(self.folder_chooser)
+		return select_directory_button
 
-	def extensionLineEdit(self):
-		extensionLineEdit = QLineEdit('.tif')
-		extensionLineEdit.setToolTip("File extension of the files to watch out")
-		extensionLineEdit.setPlaceholderText("Extension")
-		return extensionLineEdit
+	def extension_lineedit(self):
+		extension_lineedit = QLineEdit('.tif')
+		extension_lineedit.setToolTip("File extension of the files to watch out")
+		extension_lineedit.setPlaceholderText("Extension")
+		return extension_lineedit
 
 
-	def okButton(self):
-		okButton = QPushButton("Ok")
-		okButton.setFixedWidth(buttonSize)
-		okButton.clicked.connect(self.monitor)
-		okButton.setAutoDefault(True)
+	def ok_button(self):
+		ok_button = QPushButton("Ok")
+		ok_button.setFixedWidth(buttonSize)
+		ok_button.clicked.connect(self.monitor)
+		ok_button.setAutoDefault(True)
 		#okButton.setEnabled(False)
-		return okButton
+		return ok_button
 
-	def quitButton(self):
-		quitButton = QPushButton("Quit")
-		quitButton.setFixedWidth(buttonSize)
-		quitButton.clicked.connect(self.closeChooser)
-		return quitButton
+	def quit_button(self):
+		quit_button = QPushButton("Quit")
+		quit_button.setFixedWidth(buttonSize)
+		quit_button.clicked.connect(self.close_chooser)
+		return quit_button
 
 	#Message d'erreur lorsqu'un path non valide est present dans le currentPathLineEdit
-	def invalidPathLabel(self):
-		invalidPathLabel = QLabel("Invalid path")
-		invalidPathLabel.setStyleSheet("QLabel { color : red; }")
-		invalidPathLabel.setVisible(False)
-		return invalidPathLabel
+	def invalid_path_label(self):
+		invalid_path_label = QLabel("Invalid path")
+		invalid_path_label.setStyleSheet("QLabel { color : red; }")
+		invalid_path_label.setVisible(False)
+		return invalid_path_label
 
-	def activateOk(self):
-		self.okButton.setEnabled(True)
+	def activate_ok(self):
+		self.ok_button.setEnabled(True)
 
 
 	#Boite de dialogue ouverte lorsque l'on appuie sur le bouton selectDirectoryButton
-	def folderChooser(self):
+	def folder_chooser(self):
 		currentfolder = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 		dir = QFileDialog.getExistingDirectory(None, 'Select a folder:', currentfolder, QFileDialog.ShowDirsOnly)
 		if len(dir) > 0:
-			self.currentPathLineEdit.setText(dir)
+			self.current_path_lineedit.setText(dir)
 
-	def closeChooser(self):
+	def close_chooser(self):
 		self.app.quit()
 
 	def monitor(self):
 		#self.extension = self.extensionLineEdit.text()
-		if os.path.lexists(self.currentPathLineEdit.text()):
+		if os.path.lexists(self.current_path_lineedit.text()):
 			self.window.hide()
 			# if self.buttonGroup.checkedId() == 1:
 			# 	self.Monitor = finalCountDown.finalCountDown(self)
@@ -145,7 +146,7 @@ class folderchooser():
 			# 	self.Monitor = monitoring.monitoring(self)
 			# else:
 			# 	print("Fenetre invalide " + str(self.buttonGroup.checkedId()))
-			self.table = table.table(self, self.currentPathLineEdit.text(),'tif')
+			self.table = table.table(self, self.current_path_lineedit.text(),'tif')
 		else:
-			self.invalidPathLabel.setVisible(True)
+			self.invalid_path_label.setVisible(True)
 
