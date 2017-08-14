@@ -26,8 +26,12 @@
 
 Liste des dépendances
 
--sudo apt-get install python3-scipy
+- sudo pip3 install pyqt5
+
+- sudo apt-get install python3-scipy
 
 - sudo apt-get install python3-pil
 
-- pip3 install mrcfile
+- sudo pip3 install mrcfile
+
+- pip install inotify_simple
