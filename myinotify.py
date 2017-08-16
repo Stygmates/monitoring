@@ -40,7 +40,6 @@ class myInotify():
 						print('Creation')
 						self.signals.load_file.emit(event.name)
 
-
 class window():
 	def __init__(self):
 		self.window = QtWidgets.QWidget()

@@ -92,19 +92,16 @@ class table():
 		self.load_list()
 
 	def load_file(self, filename):
-		if filename.endswith(MRC_EXTENSION):
-			filename = filename[:-(len(MRC_EXTENSION))]
-			result = [filename, MRCINDEX, LOADINDEX]
-		elif filename.endswith(CTF_EXTENSION):
-			filename = filename[:-(len(CTF_EXTENSION))]
-			result = [filename, CTFINDEX, LOADINDEX]
-		elif filename.endswith(STATS_EXTENSION):
-			filename = filename[:-(len(STATS_EXTENSION))]
-			result = [filename, STATSINDEX, LOADINDEX]
-		self.update_queue.put(result)
-
-	def load_file(self, filename):
-		print('Chargement ' + filename)
+		if filename.endswith((MRC_EXTENSION, CTF_EXTENSION, STATS_EXTENSION)):
+			if filename.endswith(MRC_EXTENSION):
+				file = filename[:-(len(MRC_EXTENSION))]
+			elif filename.endswith(CTF_EXTENSION):
+				file = filename[:-(len(CTF_EXTENSION))]
+			elif filename.endswith(STATS_EXTENSION):
+				file = filename[:-(len(STATS_EXTENSION))]
+			index = self.filtered_list.index(file)
+			result = [filename, index]
+			self.update_queue.put(result)
 
 	def delete_file(self, filename):
 		print('Suppression ' + filename)
@@ -139,12 +136,12 @@ class table():
 		file_list = [f[:-4] for f in os.listdir(self.path) if f.endswith(self.extension)]
 		try:
 			regex = re.compile(self.filter_lineedit.text())
-			filtered_list = list(filter(regex.search, file_list))
+			self.filtered_list = list(filter(regex.search, file_list))
 		except Exception as e:
-			filtered_list = file_list
+			self.filtered_list = file_list
 
 		self.filequeue = queue.Queue(0)
-		for i, filename in enumerate(filtered_list):
+		for i, filename in enumerate(self.filtered_list):
 			self.table_widget.insertRow(self.table_widget.rowCount())
 			self.table_widget.setRowHeight(i, WIDGETSIZE)
 			filename_item = QtWidgets.QTableWidgetItem(filename)
