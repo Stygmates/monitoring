@@ -18,7 +18,8 @@ def get_pixmap(filename):
 		pix = QtGui.QPixmap.fromImage(qimage)
 		mrc.close()
 		return pix
-	except Exception:
+	except Exception as e:
+		print(e)
 		return None
 	except RuntimeWarning:
 		print("Nope")

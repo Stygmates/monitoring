@@ -23,8 +23,7 @@ MRCINDEX = 3
 STATSINDEX = 4
 
 LOADINDEX = 0
-RELOADINDEX = 1
-DELETEINDEX = 2
+DELETEINDEX = 1
 
 WIDGETSIZE = 220
 
@@ -38,12 +37,11 @@ class table():
 		self.window = QtWidgets.QWidget()
 		self.threadpool = QtCore.QThreadPool()
 		self.stop_loading = False
-		self.path = path
+		self.path = path + '/'
 		self.extension = extension
 		self.update_queue = queue.Queue(0)
 		self.watcher = myinotify.watcherWorker(self,self.path)
-		self.watcher.inotify.signals.reload_file.connect(self.reload_file)
-		self.watcher.inotify.signals.load_file.connect(self.reload_file)
+		self.watcher.inotify.signals.load_file.connect(self.load_file)
 		self.watcher.inotify.signals.delete_file.connect(self.delete_file)
 		self.threadpool.start(self.watcher)
 
@@ -105,8 +103,8 @@ class table():
 			result = [filename, STATSINDEX, LOADINDEX]
 		self.update_queue.put(result)
 
-	def reload_file(self, filename):
-		print('Rechargement ' + filename)
+	def load_file(self, filename):
+		print('Chargement ' + filename)
 
 	def delete_file(self, filename):
 		print('Suppression ' + filename)
@@ -218,24 +216,25 @@ class table():
 	'''
 
 	def display_image(self, row, column):
-		if column == CTFINDEX or column ==MRCINDEX:
-			
-			dialog = QtWidgets.QDialog()
-			image = QtWidgets.QLabel()
-
-			filename = self.table_widget.item(row, FILENAMEINDEX).text()
+		filename = self.table_widget.item(row, FILENAMEINDEX).text()
+		if column == CTFINDEX or column == MRCINDEX:	
 			if column == CTFINDEX:
-				pixmap = iomrc.get_pixmap(self.path + filename + CTF_EXTENSION).scaled(1000, 1000)
-				dialog.setWindowTitle(filename + CTF_EXTENSION)
+				pixmap = iomrc.get_pixmap(self.path + filename + CTF_EXTENSION)
+				window_title = filename + CTF_EXTENSION
 			elif column == MRCINDEX:
-				pixmap = iomrc.getpixmap(self.path + filename + MRC_EXTENSION).scaled(1000,1000)
-				dialog.setWindowTitle(filename + MRC_EXTENSION)
-			image.setPixmap(pixmap)
-			layout = QtWidgets.QVBoxLayout()
-			layout.addWidget(image)
-			dialog.setLayout(layout)
-			dialog.show()
-			dialog.exec_()
+				pixmap = iomrc.get_pixmap(self.path + filename + MRC_EXTENSION)
+				window_title = filename + MRC_EXTENSION
+			if pixmap is not None:
+				dialog = QtWidgets.QDialog()
+				image = QtWidgets.QLabel()
+				dialog.setWindowTitle(window_title)
+				final_pixmap = pixmap.scaled(1000, 1000)
+				image.setPixmap(final_pixmap)
+				layout = QtWidgets.QVBoxLayout()
+				layout.addWidget(image)
+				dialog.setLayout(layout)
+				dialog.show()
+				dialog.exec_()
 
 			'''
 			if column == CTFINDEX:

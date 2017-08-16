@@ -36,12 +36,9 @@ class myInotify():
 					if flag == flags.DELETE or flag == flags.MOVED_FROM:
 						print('Suppression')
 						self.signals.delete_file.emit(event.name)
-					elif flag == flags.CREATE or flag == flags.MOVED_TO:
+					elif flag == flags.CREATE or flag == flags.MOVED_TO or flag == flags.MODIFY:
 						print('Creation')
 						self.signals.load_file.emit(event.name)
-					elif flag == flags.MODIFY:
-						print('Modification')
-						self.signals.reload_file.emit(event.name)
 
 
 class window():
