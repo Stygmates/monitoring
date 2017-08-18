@@ -99,7 +99,10 @@ class table():
 				file = filename[:-(len(CTF_EXTENSION))]
 			elif filename.endswith(STATS_EXTENSION):
 				file = filename[:-(len(STATS_EXTENSION))]
-			index = self.filtered_list.index(file)
+			try:
+				index = self.filtered_list.index(file)
+			except ValueError:
+				index = -1
 			result = [filename, index]
 			self.update_queue.put(result)
 
@@ -162,6 +165,13 @@ class table():
 				worker.signals.start_next.connect(self.start_next)
 				self.threadpool.start(worker)
 		self.table_widget.sortItems(0)
+		'''
+		updater = threads.UpdaterWorker(self)
+		updater.signals.main_ctf.connect(self.update_ctf)
+		updater.signals.main_mrc.connect(self.update_mrc)
+		updater.signals.main_stats.connect(self.update_stats)
+		self.threadpool.start(updater)
+		'''
 
 	'''
 	Function called that starts a new job once the last one is done, this is to keep the number of threads workers equal to NB_WORKERS
@@ -178,6 +188,15 @@ class table():
 				worker.signals.start_next.connect(self.start_next)
 				self.threadpool.start(worker)
 
+	def start_next_update(self):
+		if not self.stop_loading:
+			updater = threads.UpdaterWorker(self)
+			updater.signals.main_ctf.connect(self.update_ctf)
+			updater.signals.main_mrc.connect(self.update_mrc)
+			updater.signals.main_stats.connect(self.update_stats)
+			updater.signals.start_next.connect(self.start_next_update)
+			self.threadpool.start(updater)
+
 	'''
 	Function that updates the filename column on the table with the result given by one of the threads
 	'''
@@ -190,23 +209,41 @@ class table():
 	'''
 
 	def update_stats(self, result):
-		self.table_widget.setItem(result[RESULTINDEX], STATSINDEX, result[ITEM])
+		print('stats ' + str(result[RESULTINDEX]))
+		if result[RESULTINDEX] == -1:
+			self.table_widget.insertRow(self.table_widget.rowCount())
+			index = self.table_widget.rowCount() - 1
+		else:
+			index = result[RESULTINDEX]
+		self.table_widget.setItem(index, STATSINDEX, result[ITEM])
 
 	'''
 	Function that updates the mrc column on the table with the result given by one of the threads
 	'''
 
 	def update_mrc(self, result):
+		print('mrc ' + str(result[RESULTINDEX]))
 		if result is not None:
-			self.table_widget.setItem(result[RESULTINDEX], MRCINDEX, result[ITEM])
+			if result[RESULTINDEX] == -1:
+				self.table_widget.insertRow(self.table_widget.rowCount())
+				index = self.table_widget.rowCount() - 1
+			else:
+				index = result[RESULTINDEX]
+			self.table_widget.setItem(index, MRCINDEX, result[ITEM])
 
 	'''
 	Function that updates the ctf column on the table with the result given by one of the threads
 	'''
 
 	def update_ctf(self, result):
+		print('ctf ' + str(result[RESULTINDEX]))
 		if result is not None:
-			self.table_widget.setItem(result[RESULTINDEX], CTFINDEX, result[ITEM])
+			if result[RESULTINDEX] == -1:
+				self.table_widget.insertRow(self.table_widget.rowCount())
+				index = self.table_widget.rowCount() - 1
+			else:
+				index = result[RESULTINDEX]
+			self.table_widget.setItem(index, CTFINDEX, result[ITEM])
 
 	'''
 	Function that creates the popup image when double clicking on an image

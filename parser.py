@@ -1,4 +1,4 @@
-def get_stats(self, filename):
+def get_stats(filename):
 	try:
 		file = open(filename,'r')
 	except IOError as e:
