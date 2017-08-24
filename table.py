@@ -12,6 +12,8 @@ from PyQt5 import QtCore, QtWidgets, Qt
 ITEM = 0
 RESULTINDEX = 1
 
+
+TIF_EXTENSION = '.tif'
 MRC_EXTENSION = '_sum-cor.mrc'
 CTF_EXTENSION = '_sum-cor.ctf'
 STATS_EXTENSION ='_sum-cor_gctf.log'
@@ -92,7 +94,7 @@ class table():
 		self.load_list()
 
 	def load_file(self, filename):
-		if filename.endswith((MRC_EXTENSION, CTF_EXTENSION, STATS_EXTENSION)):
+		if filename.endswith((TIF_EXTENSION, MRC_EXTENSION, CTF_EXTENSION, STATS_EXTENSION)):
 			if filename.endswith(MRC_EXTENSION):
 				file = filename[:-(len(MRC_EXTENSION))]
 			elif filename.endswith(CTF_EXTENSION):
@@ -145,28 +147,23 @@ class table():
 
 		self.filequeue = queue.Queue(0)
 		for i, filename in enumerate(self.filtered_list):
-			self.table_widget.insertRow(self.table_widget.rowCount())
-			self.table_widget.setRowHeight(i, WIDGETSIZE)
-			filename_item = QtWidgets.QTableWidgetItem(filename)
-			filename_item.setFlags(filename_item.flags() & ~ Qt.Qt.ItemIsEditable)
-			self.table_widget.setItem(i, FILENAMEINDEX, filename_item)
-			checkbox_item = QtWidgets.QTableWidgetItem()
-			checkbox_item.setCheckState(Qt.Qt.Unchecked)
-			self.table_widget.setItem(i, CHECKBOXINDEX, checkbox_item)
 			self.filequeue.put([i,filename])
 
 		for thread in range(NB_WORKERS):
 			if not self.filequeue.empty():
 				element = self.filequeue.get()
 				worker = threads.MainWorker(self.path, element[1], element[0])
+				worker.signals.main_add_row.connect(self.add_row)
+				worker.signals.main_filename.connect(self.update_filename)
 				worker.signals.main_ctf.connect(self.update_ctf)
 				worker.signals.main_mrc.connect(self.update_mrc)
 				worker.signals.main_stats.connect(self.update_stats)
 				worker.signals.start_next.connect(self.start_next)
 				self.threadpool.start(worker)
-		self.table_widget.sortItems(0)
+		#self.table_widget.sortItems(0)
 		'''
 		updater = threads.UpdaterWorker(self)
+		updater.signals.main_add_row.connect(self.insert_row)
 		updater.signals.main_ctf.connect(self.update_ctf)
 		updater.signals.main_mrc.connect(self.update_mrc)
 		updater.signals.main_stats.connect(self.update_stats)
@@ -182,6 +179,8 @@ class table():
 			if not self.filequeue.empty():
 				element = self.filequeue.get()
 				worker = threads.MainWorker(self.path, element[1], element[0])
+				worker.signals.main_add_row.connect(self.add_row)
+				worker.signals.main_filename.connect(self.update_filename)
 				worker.signals.main_ctf.connect(self.update_ctf)
 				worker.signals.main_mrc.connect(self.update_mrc)
 				worker.signals.main_stats.connect(self.update_stats)
@@ -191,30 +190,34 @@ class table():
 	def start_next_update(self):
 		if not self.stop_loading:
 			updater = threads.UpdaterWorker(self)
+			updater.signals.main_add_row.connect(self.insert_row)
 			updater.signals.main_ctf.connect(self.update_ctf)
 			updater.signals.main_mrc.connect(self.update_mrc)
 			updater.signals.main_stats.connect(self.update_stats)
 			updater.signals.start_next.connect(self.start_next_update)
 			self.threadpool.start(updater)
 
+
+	def add_row(self, index):
+		self.table_widget.insertRow(index)
+		self.table_widget.setRowHeight(index, WIDGETSIZE)
+		checkbox_item = QtWidgets.QTableWidgetItem()
+		checkbox_item.setCheckState(Qt.Qt.Unchecked)
+		self.table_widget.setItem(index, CHECKBOXINDEX, checkbox_item)
 	'''
 	Function that updates the filename column on the table with the result given by one of the threads
 	'''
 
 	def update_filename(self, result):
-		self.table_widget.setItem(result[RESULTINDEX], FILENAMEINDEX, result[ITEM])
+		index = result[RESULTINDEX]
+		self.table_widget.setItem(index, FILENAMEINDEX, result[ITEM])
 
 	'''
 	Function that updates the stats column on the table with the result given by one of the threads
 	'''
 
 	def update_stats(self, result):
-		print('stats ' + str(result[RESULTINDEX]))
-		if result[RESULTINDEX] == -1:
-			self.table_widget.insertRow(self.table_widget.rowCount())
-			index = self.table_widget.rowCount() - 1
-		else:
-			index = result[RESULTINDEX]
+		index = result[RESULTINDEX]
 		self.table_widget.setItem(index, STATSINDEX, result[ITEM])
 
 	'''
@@ -222,13 +225,8 @@ class table():
 	'''
 
 	def update_mrc(self, result):
-		print('mrc ' + str(result[RESULTINDEX]))
 		if result is not None:
-			if result[RESULTINDEX] == -1:
-				self.table_widget.insertRow(self.table_widget.rowCount())
-				index = self.table_widget.rowCount() - 1
-			else:
-				index = result[RESULTINDEX]
+			index = result[RESULTINDEX]
 			self.table_widget.setItem(index, MRCINDEX, result[ITEM])
 
 	'''
@@ -236,13 +234,8 @@ class table():
 	'''
 
 	def update_ctf(self, result):
-		print('ctf ' + str(result[RESULTINDEX]))
 		if result is not None:
-			if result[RESULTINDEX] == -1:
-				self.table_widget.insertRow(self.table_widget.rowCount())
-				index = self.table_widget.rowCount() - 1
-			else:
-				index = result[RESULTINDEX]
+			index = result[RESULTINDEX]
 			self.table_widget.setItem(index, CTFINDEX, result[ITEM])
 
 	'''
@@ -269,24 +262,6 @@ class table():
 				dialog.setLayout(layout)
 				dialog.show()
 				dialog.exec_()
-
-			'''
-			if column == CTFINDEX:
-				try:
-					pixmap = self.dictionnaireCtf[row].scaled(1000,1000)
-				except KeyError:
-					return
-			else:
-				try:
-					pixmap = self.dictionnaireMrc[row].scaled(1000,1000)
-				except KeyError:
-					return
-			image.setPixmap(pixmap)
-			layout = QtWidgets.QVBoxLayout()
-			layout.addWidget(image)
-			dialog.setLayout(layout)
-			dialog.show()
-			'''
 
 	'''
 	'''
