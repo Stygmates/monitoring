@@ -30,14 +30,10 @@ class myInotify():
 	def read(self):
 		while self.keep_watching:
 			for event in self.inotify.read(timeout=500):
-				print("Watching")
-				print(event)
 				for flag in flags.from_mask(event.mask):
 					if flag == flags.DELETE or flag == flags.MOVED_FROM:
-						print('Suppression')
 						self.signals.delete_file.emit(event.name)
 					elif flag == flags.CREATE or flag == flags.MOVED_TO or flag == flags.MODIFY:
-						print('Creation')
 						self.signals.load_file.emit(event.name)
 
 class window():

@@ -7,6 +7,7 @@ import shutil
 import iomrc
 import myinotify
 import threads
+import jobs
 from PyQt5 import QtCore, QtWidgets, Qt
 
 ITEM = 0
@@ -37,15 +38,18 @@ class table():
 	def __init__(self, parent, path, extension):
 		self.parent = parent
 		self.window = QtWidgets.QWidget()
-		self.threadpool = QtCore.QThreadPool()
+		self.watcher_threadpool = QtCore.QThreadPool()
+		self.worker_threadpool = QtCore.QThreadPool()
+		self.updater_threadpool = QtCore.QThreadPool()
 		self.stop_loading = False
+		self.updater_started = False
 		self.path = path + '/'
 		self.extension = extension
 		self.update_queue = queue.Queue(0)
-		self.watcher = myinotify.watcherWorker(self,self.path)
+		self.watcher = myinotify.watcherWorker(self, self.path)
 		self.watcher.inotify.signals.load_file.connect(self.load_file)
 		self.watcher.inotify.signals.delete_file.connect(self.delete_file)
-		self.threadpool.start(self.watcher)
+		self.watcher_threadpool.start(self.watcher)
 
 		self.parent.app.aboutToQuit.connect(self.watcher.inotify.stop_watching)
 		self.parent.app.aboutToQuit.connect(self.quit_function)
@@ -94,22 +98,12 @@ class table():
 		self.load_list()
 
 	def load_file(self, filename):
-		if filename.endswith((TIF_EXTENSION, MRC_EXTENSION, CTF_EXTENSION, STATS_EXTENSION)):
-			if filename.endswith(MRC_EXTENSION):
-				file = filename[:-(len(MRC_EXTENSION))]
-			elif filename.endswith(CTF_EXTENSION):
-				file = filename[:-(len(CTF_EXTENSION))]
-			elif filename.endswith(STATS_EXTENSION):
-				file = filename[:-(len(STATS_EXTENSION))]
-			try:
-				index = self.filtered_list.index(file)
-			except ValueError:
-				index = -1
-			result = [filename, index]
-			self.update_queue.put(result)
+		result = [filename, LOADINDEX]
+		self.update_queue.put(result)
 
 	def delete_file(self, filename):
-		print('Suppression ' + filename)
+		result = [filename, DELETEINDEX]
+		self.update_queue.put(result)
 
 	'''
 	Main widget containing the list of all the data
@@ -153,22 +147,13 @@ class table():
 			if not self.filequeue.empty():
 				element = self.filequeue.get()
 				worker = threads.MainWorker(self.path, element[1], element[0])
-				worker.signals.main_add_row.connect(self.add_row)
-				worker.signals.main_filename.connect(self.update_filename)
-				worker.signals.main_ctf.connect(self.update_ctf)
-				worker.signals.main_mrc.connect(self.update_mrc)
-				worker.signals.main_stats.connect(self.update_stats)
+				worker.signals.add_row.connect(self.add_row)
+				worker.signals.add_filename.connect(self.add_filename)
+				worker.signals.add_ctf.connect(self.add_ctf)
+				worker.signals.add_mrc.connect(self.add_mrc)
+				worker.signals.add_stats.connect(self.add_stats)
 				worker.signals.start_next.connect(self.start_next)
-				self.threadpool.start(worker)
-		#self.table_widget.sortItems(0)
-		'''
-		updater = threads.UpdaterWorker(self)
-		updater.signals.main_add_row.connect(self.insert_row)
-		updater.signals.main_ctf.connect(self.update_ctf)
-		updater.signals.main_mrc.connect(self.update_mrc)
-		updater.signals.main_stats.connect(self.update_stats)
-		self.threadpool.start(updater)
-		'''
+				self.worker_threadpool.start(worker)
 
 	'''
 	Function called that starts a new job once the last one is done, this is to keep the number of threads workers equal to NB_WORKERS
@@ -179,23 +164,33 @@ class table():
 			if not self.filequeue.empty():
 				element = self.filequeue.get()
 				worker = threads.MainWorker(self.path, element[1], element[0])
-				worker.signals.main_add_row.connect(self.add_row)
-				worker.signals.main_filename.connect(self.update_filename)
-				worker.signals.main_ctf.connect(self.update_ctf)
-				worker.signals.main_mrc.connect(self.update_mrc)
-				worker.signals.main_stats.connect(self.update_stats)
-				worker.signals.start_next.connect(self.start_next)
-				self.threadpool.start(worker)
+				worker.signals.add_row.connect(self.add_row)
+				worker.signals.add_filename.connect(self.add_filename)
+				worker.signals.add_ctf.connect(self.add_ctf)
+				worker.signals.add_mrc.connect(self.add_mrc)
+				worker.signals.add_stats.connect(self.add_stats)
+				worker.signals.start_next.connect(self.add_next)
+				self.worker_threadpool.start(worker)
+			else:
+				self.worker_threadpool.waitForDone()
+				if not self.updater_started:
+					self.updater_started = True
+					self.start_next_update()
 
 	def start_next_update(self):
 		if not self.stop_loading:
 			updater = threads.UpdaterWorker(self)
-			updater.signals.main_add_row.connect(self.insert_row)
-			updater.signals.main_ctf.connect(self.update_ctf)
-			updater.signals.main_mrc.connect(self.update_mrc)
-			updater.signals.main_stats.connect(self.update_stats)
+			updater.signals.add_row.connect(self.add_row)
+			updater.signals.add_filename.connect(self.add_filename)
+			updater.signals.add_ctf.connect(self.add_ctf)
+			updater.signals.add_mrc.connect(self.add_mrc)
+			updater.signals.add_stats.connect(self.add_stats)
+			updater.signals.delete_row.connect(self.delete_row)
+			updater.signals.delete_ctf.connect(self.delete_ctf)
+			updater.signals.delete_mrc.connect(self.delete_mrc)
+			updater.signals.delete_stats.connect(self.delete_stats)
 			updater.signals.start_next.connect(self.start_next_update)
-			self.threadpool.start(updater)
+			self.updater_threadpool.start(updater)
 
 
 	def add_row(self, index):
@@ -208,7 +203,7 @@ class table():
 	Function that updates the filename column on the table with the result given by one of the threads
 	'''
 
-	def update_filename(self, result):
+	def add_filename(self, result):
 		index = result[RESULTINDEX]
 		self.table_widget.setItem(index, FILENAMEINDEX, result[ITEM])
 
@@ -216,7 +211,7 @@ class table():
 	Function that updates the stats column on the table with the result given by one of the threads
 	'''
 
-	def update_stats(self, result):
+	def add_stats(self, result):
 		index = result[RESULTINDEX]
 		self.table_widget.setItem(index, STATSINDEX, result[ITEM])
 
@@ -224,7 +219,7 @@ class table():
 	Function that updates the mrc column on the table with the result given by one of the threads
 	'''
 
-	def update_mrc(self, result):
+	def add_mrc(self, result):
 		if result is not None:
 			index = result[RESULTINDEX]
 			self.table_widget.setItem(index, MRCINDEX, result[ITEM])
@@ -233,10 +228,45 @@ class table():
 	Function that updates the ctf column on the table with the result given by one of the threads
 	'''
 
-	def update_ctf(self, result):
+	def add_ctf(self, result):
 		if result is not None:
 			index = result[RESULTINDEX]
 			self.table_widget.setItem(index, CTFINDEX, result[ITEM])
+
+
+	def delete_row(self, index):
+		self.table_widget.removeRow(index)
+	'''
+	Function that updates the filename column on the table with the result given by one of the threads
+	'''
+
+	def delete_filename(self, index):
+		filename_item = jobs.new_filename()
+		self.table_widget.setItem(index, FILENAMEINDEX, filename_item)
+
+	'''
+	Function that updates the stats column on the table with the result given by one of the threads
+	'''
+
+	def delete_stats(self, index):
+		stats_item = jobs.new_stats()
+		self.table_widget.setItem(index, STATSINDEX, stats_item)
+
+	'''
+	Function that updates the mrc column on the table with the result given by one of the threads
+	'''
+
+	def delete_mrc(self, index):
+		mrc_item = jobs.new_mrc()
+		self.table_widget.setItem(index, MRCINDEX, mrc_item)
+
+	'''
+	Function that updates the ctf column on the table with the result given by one of the threads
+	'''
+
+	def delete_ctf(self, index):
+		ctf_item = jobs.new_ctf()
+		self.table_widget.setItem(index, CTFINDEX, ctf_item)
 
 	'''
 	Function that creates the popup image when double clicking on an image
@@ -364,15 +394,19 @@ class table():
 
 	def back_function(self):
 		self.stop_loading = True
-		self.threadpool.clear()
-		self.threadpool.waitForDone()
+		self.worker_threadpool.clear()
+		self.updater_threadpool.clear()
+		self.worker_threadpool.waitForDone()
+		self.updater_threadpool.waitForDone()
 		self.window.close()
 		self.parent.window.show()
 
 	def quit_function(self):
 		self.stop_loading = True
-		self.threadpool.clear()
-		self.threadpool.waitForDone()
+		self.worker_threadpool.clear()
+		self.updater_threadpool.clear()
+		self.worker_threadpool.waitForDone()
+		self.updater_threadpool.waitForDone()
 		self.parent.app.quit()
 
 

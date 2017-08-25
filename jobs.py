@@ -41,7 +41,7 @@ def load_stats(path, filename, index):
 	statslog = path + filename + table.STATS_EXTENSION
 	stats = parser.get_stats(statslog)
 	if stats is None or len(stats) == 0:
-		stats_item = QtWidgets.QTableWidgetItem("Defocus U:\nDefocus V:\n Phase shift: ")
+		stats_item = QtWidgets.QTableWidgetItem("Defocus U:\nDefocus V:\nPhase shift: ")
 	elif len(stats) == 3:
 		stats_item = QtWidgets.QTableWidgetItem(
 			"Defocus U: " + stats[0] + "\nDefocus V: " + stats[1] + "\nPhase shift: " + stats[2])
@@ -52,7 +52,18 @@ def load_stats(path, filename, index):
 	result = [stats_item, index]
 	return result
 
+def new_mrc():
+	mrc_item = QtWidgets.QTableWidgetItem()
+	return mrc_item
 
+def new_ctf():
+	ctf_item = QtWidgets.QTableWidgetItem()
+	return ctf_item
+
+def new_stats():
+	stats_item = QtWidgets.QTableWidgetItem("Defocus U:\nDefocus V:\nPhase shift: ")
+	stats_item.setFlags(stats_item.flags() & ~ Qt.Qt.ItemIsEditable)
+	return stats_item
 # def load_row(path, filename, index):
 # 	filename_item = load_filename(path, filename, index)
 # 	mrc_item = load_mrc(path, filename, index)
