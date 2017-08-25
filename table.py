@@ -139,6 +139,7 @@ class table():
 		except Exception as e:
 			self.filtered_list = file_list
 
+		self.filtered_list.sort()
 		self.filequeue = queue.Queue(0)
 		for i, filename in enumerate(self.filtered_list):
 			self.filequeue.put([i,filename])
@@ -169,7 +170,7 @@ class table():
 				worker.signals.add_ctf.connect(self.add_ctf)
 				worker.signals.add_mrc.connect(self.add_mrc)
 				worker.signals.add_stats.connect(self.add_stats)
-				worker.signals.start_next.connect(self.add_next)
+				worker.signals.start_next.connect(self.start_next)
 				self.worker_threadpool.start(worker)
 			else:
 				self.worker_threadpool.waitForDone()
