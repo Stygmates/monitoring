@@ -41,6 +41,7 @@ class table():
 		self.watcher_threadpool = QtCore.QThreadPool()
 		self.worker_threadpool = QtCore.QThreadPool()
 		self.updater_threadpool = QtCore.QThreadPool()
+		self.graph_threadpool = QtCore.QThreadPool()
 		self.stop_loading = False
 		self.updater_started = False
 		self.path = path + '/'
@@ -424,7 +425,8 @@ class table():
 
 	def graph_function(self):
 		command = 'python3 ' +os.path.dirname(os.path.abspath(__file__)) + '/graph.py ' + self.path
-		os.system(command)
+		graph_worker = threads.GraphWorker(command)
+		self.graph_threadpool.start(graph_worker)
 
 
 

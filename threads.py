@@ -1,3 +1,4 @@
+import os
 import jobs
 import queue
 import table
@@ -110,3 +111,11 @@ class UpdaterWorker(QtCore.QRunnable):
 				self.signals.start_next.emit()
 		else:
 			pass
+
+class GraphWorker(QtCore.QRunnable):
+	def __init__(self, command):
+		super(GraphWorker, self).__init__()
+		self.command = command
+
+	def run(self):
+		os.system(self.command)
