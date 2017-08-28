@@ -74,14 +74,16 @@ class table():
 		self.move_button = self.move_button()
 		self.quit_button = self.quit_button()
 		self.back_button = self.back_button()
+		self.graph_button = self.graph_button()
 
 		self.buttons_layout.addWidget(self.check_all_button, 0, 0, 1, 2)
 		self.buttons_layout.addWidget(self.clear_selection_button, 1, 0, 1, 2)
 		self.buttons_layout.addWidget(self.uncheck_selected_button, 2, 0)
 		self.buttons_layout.addWidget(self.check_selected_button, 2, 1)
 		self.buttons_layout.addWidget(self.move_button, 3, 0, 1, 2)
-		self.buttons_layout.addWidget(self.quit_button, 4, 0)
-		self.buttons_layout.addWidget(self.back_button, 4, 1)
+		self.buttons_layout.addWidget(self.graph_button, 4, 0, 1, 2)
+		self.buttons_layout.addWidget(self.quit_button, 5, 0)
+		self.buttons_layout.addWidget(self.back_button, 5, 1)
 
 		self.filter_layout.addWidget(self.path_label)
 		self.filter_layout.addWidget(self.filter_lineedit)
@@ -125,20 +127,25 @@ class table():
 			table_widget.setColumnWidth(i, WIDGETSIZE)
 		return table_widget
 
-
+	def filter_list(self):
+		file_list = [f[:-4] for f in os.listdir(self.path) if f.endswith(self.extension)]
+		try:
+			regex = re.compile(self.filter_lineedit.text())
+			visible_list = list(filter(regex.search, file_list))
+		except Exception as e:
+			visible_list = file_list
+		for index, filename in enumerate(file_list):
+			if filename in visible_list:
+				self.table_widget.setRowHidden(index, False)
+			else:
+				self.table_widget.setRowHidden(index, True)
 	'''
 	Function that updates the table with all of the data
 	'''
 
 	def load_list(self):
 		self.table_widget.setRowCount(0)
-		file_list = [f[:-4] for f in os.listdir(self.path) if f.endswith(self.extension)]
-		try:
-			regex = re.compile(self.filter_lineedit.text())
-			self.filtered_list = list(filter(regex.search, file_list))
-		except Exception as e:
-			self.filtered_list = file_list
-
+		self.filtered_list = [f[:-4] for f in os.listdir(self.path) if f.endswith(self.extension)]
 		self.filtered_list.sort()
 		self.filequeue = queue.Queue(0)
 		for i, filename in enumerate(self.filtered_list):
@@ -309,7 +316,7 @@ class table():
 		filter_lineedit = QtWidgets.QLineEdit()
 		filter_lineedit.setFixedWidth(400)
 		filter_lineedit.setPlaceholderText("Filter")
-		filter_lineedit.textChanged.connect(self.load_list)
+		filter_lineedit.textChanged.connect(self.filter_list)
 		return filter_lineedit
 
 	def check_all_button(self):
@@ -350,6 +357,11 @@ class table():
 		quit_button.clicked.connect(self.quit_function)
 		#quitButton.setFixedWidth(self.buttonsSize)
 		return quit_button
+
+	def graph_button(self):
+		graph_button =QtWidgets.QPushButton("Display phase shift's graph")
+		graph_button.clicked.connect(self.graph_function)
+		return graph_button
 
 	'''
 	'''
@@ -409,6 +421,10 @@ class table():
 		self.worker_threadpool.waitForDone()
 		self.updater_threadpool.waitForDone()
 		self.parent.app.quit()
+
+	def graph_function(self):
+		command = 'python3 ' +os.path.dirname(os.path.abspath(__file__)) + '/graph.py ' + self.path
+		os.system(command)
 
 
 
