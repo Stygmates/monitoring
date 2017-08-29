@@ -29,6 +29,71 @@ def get_stats(filename):
 		file.close()
 		return
 
+def get_defocus_u(filename):
+	try:
+		file = open(filename, 'r')
+	except IOError:
+		return
+	else:
+		line = file.readline()
+		tab = []
+		while line !='':
+			line = file.readline()
+			tab.append(line)
+		tab.reverse()
+		for index, line in enumerate(tab):
+			if 'Final Values' in line:
+				file.close()
+				values = line.split()
+				parameters = tab[index + 1].split()
+				if 'Defocus_U' in parameters:
+					for i, parameter in enumerate(parameters):
+						if parameter == 'Defocus_U':
+							return values[i]
+				else:
+					return None
+
+def get_defocus_v(filename):
+	try:
+		file = open(filename, 'r')
+	except IOError:
+		return
+	else:
+		line = file.readline()
+		tab = []
+		while line !='':
+			line = file.readline()
+			tab.append(line)
+		tab.reverse()
+		for index, line in enumerate(tab):
+			if 'Final Values' in line:
+				file.close()
+				values = line.split()
+				parameters = tab[index + 1].split()
+				if 'Defocus_V' in parameters:
+					for i, parameter in enumerate(parameters):
+						if parameter == 'Defocus_V':
+							return values[i]
+				else:
+					return None
+
+def get_defocus(path, extension):
+	logs = []
+	defocus_u = []
+	defocus_v = []
+	filenames = []
+	for file in os.listdir(path):
+		if file.endswith(extension):
+			logs.append(file)
+		logs.sort()
+		for element in logs:
+			filename = path + element
+			if get_defocus_u(filename) is not None and get_defocus_v(filename) is not None:
+				defocus_u.append(get_defocus_u(filename))
+				defocus_v.append(get_defocus_v(filename))
+				filenames.append(filename)
+	return filenames, defocus_u, defocus_v
+
 def get_phase_shift(filename):
 	try:
 		file = open(filename, 'r')
@@ -46,7 +111,6 @@ def get_phase_shift(filename):
 				file.close()
 				values = line.split()
 				parameters = tab[index + 1].split()
-				result = []
 				if 'Phase_shift' in parameters:
 					for i, parameter in enumerate(parameters):
 						if parameter == 'Phase_shift':

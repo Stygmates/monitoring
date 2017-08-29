@@ -75,14 +75,16 @@ class table():
 		self.move_button = self.move_button()
 		self.quit_button = self.quit_button()
 		self.back_button = self.back_button()
-		self.graph_button = self.graph_button()
+		self.phase_shift_graph_button = self.phase_shift_graph_button()
+		self.defocus_graph_button = self.defocus_graph_button()
 
 		self.buttons_layout.addWidget(self.check_all_button, 0, 0, 1, 2)
 		self.buttons_layout.addWidget(self.clear_selection_button, 1, 0, 1, 2)
 		self.buttons_layout.addWidget(self.uncheck_selected_button, 2, 0)
 		self.buttons_layout.addWidget(self.check_selected_button, 2, 1)
 		self.buttons_layout.addWidget(self.move_button, 3, 0, 1, 2)
-		self.buttons_layout.addWidget(self.graph_button, 4, 0, 1, 2)
+		self.buttons_layout.addWidget(self.phase_shift_graph_button, 4, 0)
+		self.buttons_layout.addWidget(self.defocus_graph_button, 4, 1)
 		self.buttons_layout.addWidget(self.quit_button, 5, 0)
 		self.buttons_layout.addWidget(self.back_button, 5, 1)
 
@@ -359,10 +361,15 @@ class table():
 		#quitButton.setFixedWidth(self.buttonsSize)
 		return quit_button
 
-	def graph_button(self):
-		graph_button =QtWidgets.QPushButton("Display phase shift's graph")
-		graph_button.clicked.connect(self.graph_function)
-		return graph_button
+	def phase_shift_graph_button(self):
+		phase_shift_graph_button =QtWidgets.QPushButton("Display phase shift graph")
+		phase_shift_graph_button.clicked.connect(self.phase_shift_graph_function)
+		return phase_shift_graph_button
+
+	def defocus_graph_button(self):
+		defocus_graph_button =QtWidgets.QPushButton("Display defocus graph")
+		defocus_graph_button.clicked.connect(self.defocus_graph_function)
+		return defocus_graph_button
 
 	'''
 	'''
@@ -423,8 +430,13 @@ class table():
 		self.updater_threadpool.waitForDone()
 		self.parent.app.quit()
 
-	def graph_function(self):
-		command = 'python3 ' +os.path.dirname(os.path.abspath(__file__)) + '/graph.py ' + self.path
+	def phase_shift_graph_function(self):
+		command = 'python3 ' + os.path.dirname(os.path.abspath(__file__)) + '/graph.py ' + self.path + ' phase_shift'
+		graph_worker = threads.GraphWorker(command)
+		self.graph_threadpool.start(graph_worker)
+
+	def defocus_graph_function(self):
+		command = 'python3 ' + os.path.dirname(os.path.abspath(__file__)) + '/graph.py ' + self.path + ' defocus'
 		graph_worker = threads.GraphWorker(command)
 		self.graph_threadpool.start(graph_worker)
 
