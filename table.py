@@ -210,17 +210,6 @@ class table():
 		checkbox_item = QtWidgets.QTableWidgetItem()
 		checkbox_item.setCheckState(Qt.Qt.Unchecked)
 		self.table_widget.setItem(index, CHECKBOXINDEX, checkbox_item)
-		file_list = [f[:-4] for f in os.listdir(self.path) if f.endswith(self.extension)]
-		try:
-			regex = re.compile(self.filter_lineedit.text())
-			visible_list = list(filter(regex.search, file_list))
-			if file_list[index] in visible_list:
-				self.table_widget.setRowHidden(index, False)
-			else:
-				self.table_widget.setRowHidden(index, True)
-		except Exception as e:
-			visible_list = file_list
-
 	'''
 	Function that updates the filename column on the table with the result given by one of the threads
 	'''
