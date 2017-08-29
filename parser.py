@@ -94,7 +94,7 @@ def get_defocus(path, extension):
 		if def_u is not None and def_v is not None:
 			defocus_u.append(def_u)
 			defocus_v.append(def_v)
-			filenames.append(element[:-len(extension)])
+			filenames.append(filename)
 	return filenames, defocus_u, defocus_v
 
 def get_phase_shift(filename):
@@ -134,5 +134,5 @@ def get_phase_shifts(path, extension):
 		filename = path + element
 		if get_phase_shift(filename) is not None:
 			phase_shifts.append(get_phase_shift(filename))
-			filenames.append(element[:-len(extension)])
+			filenames.append(element)
 	return filenames, phase_shifts
