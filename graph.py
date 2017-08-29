@@ -18,11 +18,6 @@ elif graph == 'defocus':
 	filenames, defocus_u, defocus_v = parser.get_defocus(path, extension)
 	plt.figure('Defocus graph')
 	if len(filenames) > 0:
-		plt.plot(defocus_u,defocus_v, 'ro')
-filenames, phase_shifts = parser.get_phase_shifts(path, extension)
-plt.plot(phase_shifts, 'ro')
-plt.axhline(y = 180, color = 'k')
-plt.axhline(y = 35, color = 'k', linestyle = '--')
-plt.axhline(y = 145, color = 'k', linestyle = '--')
-plt.axhline(color = 'k')
+		plt.plot(defocus_u, defocus_v, 'ro')
+		plt.axhline(color = 'k')
 plt.show()
