@@ -34,3 +34,5 @@ Liste des dépendances
 - sudo pip3 install mrcfile
 
 - pip install inotify_simple
+
+- sudo pip3 install mpld3
