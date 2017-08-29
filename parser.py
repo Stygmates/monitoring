@@ -24,6 +24,7 @@ def get_stats(filename):
 						result.append(values[i])
 					if parameter == "Phase_shift":
 						result.append(values[i])
+				file.close()
 				return result
 
 		file.close()
@@ -85,13 +86,15 @@ def get_defocus(path, extension):
 	for file in os.listdir(path):
 		if file.endswith(extension):
 			logs.append(file)
-		logs.sort()
-		for element in logs:
-			filename = path + element
-			if get_defocus_u(filename) is not None and get_defocus_v(filename) is not None:
-				defocus_u.append(get_defocus_u(filename))
-				defocus_v.append(get_defocus_v(filename))
-				filenames.append(filename)
+	logs.sort()
+	for element in logs:
+		filename = path + element
+		def_u = get_defocus_u(filename)
+		def_v = get_defocus_v(filename)
+		if def_u is not None and def_v is not None:
+			defocus_u.append(def_u)
+			defocus_v.append(def_v)
+			filenames.append(filename)
 	return filenames, defocus_u, defocus_v
 
 def get_phase_shift(filename):
