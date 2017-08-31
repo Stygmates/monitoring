@@ -19,7 +19,7 @@ class myInotify():
 	def __init__(self, path):
 		self.keep_watching = True
 		self.inotify = INotify()
-		watch_flags = flags.CREATE | flags.DELETE | flags.MODIFY| masks.MOVE
+		watch_flags = flags.CLOSE_WRITE | flags.DELETE | masks.MOVE
 		wd = self.inotify.add_watch(path, watch_flags)
 		self.signals = watcherWorkerSignals()
 
@@ -33,7 +33,7 @@ class myInotify():
 				for flag in flags.from_mask(event.mask):
 					if flag == flags.DELETE or flag == flags.MOVED_FROM:
 						self.signals.delete_file.emit(event.name)
-					elif flag == flags.CREATE or flag == flags.MOVED_TO or flag == flags.MODIFY:
+					elif flag == flags.CLOSE_WRITE or flag == flags.MOVED_TO:
 						self.signals.load_file.emit(event.name)
 
 class window():
